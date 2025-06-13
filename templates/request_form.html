@@ -2,75 +2,58 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>ขอใบเสนอราคา - SAS Transmission</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ขอใบเสนอราคา</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <div class="form-container">
-    <h2>📋 ขอใบเสนอราคา</h2>
-    <form action="/request" method="POST" enctype="multipart/form-data">
+    <h2>📤 ฟอร์มขอใบเสนอราคา</h2>
+    <form method="POST" enctype="multipart/form-data">
+      <label>ชื่อ Sale</label>
+      <input type="text" name="sale_name">
 
-      <!-- STEP 1 -->
-      <label>ชื่อ Sale *</label>
-      <input type="text" name="sale_name" required>
+      <label>ชื่อลูกค้า</label>
+      <input type="text" name="customer_name">
 
-      <label>ชื่อลูกค้า *</label>
-      <input type="text" name="customer_name" required>
+      <label>เบอร์โทรลูกค้า</label>
+      <input type="text" name="phone">
 
-      <label>เบอร์ติดต่อ *</label>
-      <input type="tel" name="phone" required>
+      <label>ชื่อบริษัทลูกค้า</label>
+      <input type="text" name="customer_company">
 
-      <label>ชื่อบริษัทลูกค้า *</label>
-      <input type="text" name="customer_company" required>
+      <label>วัตถุประสงค์</label>
+      <select name="purpose">
+        <option value="">-- เลือก --</option>
+        <option value="new_build">งานสร้างใหม่</option>
+        <option value="replacement">ทดแทนของเดิม</option>
+      </select>
 
-      <hr>
-
-      <!-- STEP 2 -->
-      <label>ประเภทการซื้อ *</label><br>
-      <input type="radio" name="purpose" value="สร้างเครื่องจักรใหม่" required> สร้างเครื่องจักรใหม่
-      <input type="radio" name="purpose" value="วางแทนของเดิม"> วางแทนของเดิม
-
-      <label>ชื่อรุ่นเดิม (ถ้ามี)</label>
+      <label>ชื่อ Model ของเดิม (ถ้ามี)</label>
       <input type="text" name="model_old">
+      <label style="color:red;">* แนบรูป Model (ถ้ามี)</label>
+      <input type="file" name="image_model" accept="image/*">
 
-      <label style="color: red;">แนบรูปโมเดลเดิม (จำเป็นถ้าไม่กรอกชื่อรุ่น)</label>
-      <input type="file" name="image_model">
+      <label>Motor (W / HP / KW)</label>
+      <input type="text" name="motor_w" placeholder="Watt">
+      <input type="text" name="motor_hp" placeholder="HP">
+      <input type="text" name="motor_kw" placeholder="KW">
+      <input type="file" name="image_motor" accept="image/*">
 
-      <hr>
-
-      <!-- STEP 3 -->
-      <label>ขนาดมอเตอร์</label><br>
-      W: <input type="text" name="motor_w" style="width: 80px;">
-      HP: <input type="text" name="motor_hp" style="width: 80px;">
-      kW: <input type="text" name="motor_kw" style="width: 80px;">
-
-      <label>แนบรูปขนาดมอเตอร์ (ถ้าไม่กรอก)</label>
-      <input type="file" name="image_motor">
-
-      <label>Gear Head Ratio</label>
+      <label>Gear Ratio</label>
       <input type="text" name="ratio">
+      <input type="file" name="image_ratio" accept="image/*">
 
-      <label>แนบรูปอัตราทด (ถ้าไม่กรอก)</label>
-      <input type="file" name="image_ratio">
-
-      <hr>
-
-      <!-- STEP 4 -->
       <label>ขนาดเพลา</label>
       <input type="text" name="shaft">
-      <button type="button" onclick="document.querySelector('[name=shaft]').value='ไม่มีข้อมูล'">ไม่มีข้อมูล</button>
 
-      <label style="color: red;">แนบรูปทิศทางการติดตั้ง *</label>
-      <input type="file" name="install_direction">
-      <button type="button" onclick="document.querySelector('[name=install_direction]').value='ไม่มีข้อมูล'">ไม่มีข้อมูล</button>
+      <label>แนวการติดตั้ง (แนบรูป)</label>
+      <input type="file" name="install_direction" accept="image/*">
+      <p style="color:red;">* ข้อมูลจำเป็นในการเลือก Spec ให้ตรงที่สุด</p>
 
-      <p style="color: red;">* ข้อมูลนี้สำคัญมากเพื่อเลือก Spec ที่ตรงกับความต้องการของลูกค้า</p>
-
-      <br><br>
-      <button type="submit" class="button">📤 ส่งข้อมูล</button>
-      <a href="/" class="button-outline">🔙 กลับหน้าแรก</a>
-
+      <button type="submit">ส่งข้อมูล</button>
     </form>
+    <a href="/" class="button-outline">🔙 กลับหน้าแรก</a>
   </div>
 </body>
 </html>
