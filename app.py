@@ -4,6 +4,8 @@ from firebase_admin import credentials, firestore, storage
 from dotenv import load_dotenv
 from datetime import datetime
 import os
+import json
+from io import StringIO
 import smtplib
 from email.message import EmailMessage
 
@@ -14,15 +16,18 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("Hihitler888")
 
-# Init Firebase
-cred = credentials.Certificate("serviceAccountKey.json")
+# Load Firebase credential from ENV
+firebase_key_str = os.getenv("FIREBASE_KEY_JSON")
+firebase_key = json.load(StringIO(firebase_key_str))
+
+cred = credentials.Certificate(firebase_key)
 firebase_admin.initialize_app(cred, {
-    'storageBucket': f"{os.getenv('FIREBASE_PROJECT_ID')}.appspot.com"
+    'storageBucket': f"{os.getenv('FIREBASE_PROJECT_ID")}.appspot.com"
 })
 db = firestore.client()
 bucket = storage.bucket()
 
-# ====== Function: Upload file to Firebase Storage ======
+# ====== Upload file to Firebase Storage ======
 def upload_file_to_firebase(file, folder_name="uploads"):
     if file and file.filename != '':
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -32,11 +37,11 @@ def upload_file_to_firebase(file, folder_name="uploads"):
         return blob.public_url
     return ''
 
-# ====== Function: Send notification email ======
+# ====== Send Email Notification ======
 def send_notification_email(sale_name, customer_name, customer_company, pdf_url):
     msg = EmailMessage()
     msg['Subject'] = f"[SAS] ใบเสนอราคาสำเร็จ - ลูกค้า {customer_company}"
-    msg['From'] = "somyotsw442@gmail.com"  # ← เปลี่ยนเป็นอีเมลของคุณ
+    msg['From'] = "somyotsw442@gmail.com"  # 🔁 ใส่อีเมลจริง
     msg['To'] = "Somyot@synergy-as.com"
     msg['Cc'] = "traiwit@synergy-as.com, kongkiat@synergy-as.com"
 
@@ -53,28 +58,26 @@ def send_notification_email(sale_name, customer_name, customer_company, pdf_url)
     msg.set_content(body)
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-        smtp.login('somyotsw442@gmail.com', 'dfwj earf bvuj jcrv')  # ← ใส่รหัส App Password
+        smtp.login('somyotsw442@gmail.com', 'dfwj earf bvuj jcrv')  # 🔁 ใช้ App Password จริง
         smtp.send_message(msg)
 
-# ====== Route: Home ======
+# ====== Home ======
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# ====== Route: Request Form ======
+# ====== Request Form ======
 @app.route('/request', methods=['GET', 'POST'])
 def request_form():
     if request.method == 'POST':
         form = request.form
         files = request.files
 
-        # Upload images to Firebase
         image_model_url = upload_file_to_firebase(files.get('image_model'), "model")
         image_motor_url = upload_file_to_firebase(files.get('image_motor'), "motor")
         image_ratio_url = upload_file_to_firebase(files.get('image_ratio'), "ratio")
         install_direction_url = upload_file_to_firebase(files.get('install_direction'), "install")
 
-        # Prepare Firestore data
         data = {
             'sale_name': form.get('sale_name'),
             'customer_name': form.get('customer_name'),
@@ -100,24 +103,22 @@ def request_form():
 
     return render_template('request_form.html')
 
-# ====== Route: Dashboard ======
+# ====== Dashboard ======
 @app.route('/dashboard')
 def dashboard():
     docs = db.collection('quotations').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
     entries = [doc.to_dict() | {'id': doc.id} for doc in docs]
     return render_template('dashboard.html', entries=entries)
 
-# ====== Route: Upload Quotation PDF ======
+# ====== Upload PDF & Send Email ======
 @app.route('/upload_pdf/<doc_id>', methods=['POST'])
 def upload_pdf(doc_id):
     pdf_file = request.files['pdf_file']
     if not pdf_file or pdf_file.filename == '':
         return "No PDF selected", 400
 
-    # Upload to Firebase
     pdf_url = upload_file_to_firebase(pdf_file, folder_name="quotation_pdf")
 
-    # Update Firestore
     doc_ref = db.collection('quotations').document(doc_id)
     doc = doc_ref.get()
     if doc.exists:
@@ -127,7 +128,6 @@ def upload_pdf(doc_id):
             'quotation_pdf_url': pdf_url
         })
 
-        # Send Email Notification
         send_notification_email(
             sale_name=data.get('sale_name'),
             customer_name=data.get('customer_name'),
@@ -137,6 +137,6 @@ def upload_pdf(doc_id):
 
     return redirect(url_for('dashboard'))
 
-# ====== Run App ======
+# ====== Run (local only) ======
 if __name__ == '__main__':
     app.run(debug=True)
