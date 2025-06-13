@@ -18,7 +18,45 @@ firebase_admin.initialize_app(cred, {
 })
 
 ref = db.reference("/quotations")
+bucket = storage.bucket()
 
+# ====== Upload file to Firebase Storage ======
+def upload_file_to_firebase(file, folder_name="uploads"):
+    if file and file.filename:
+        filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{secure_filename(file.filename)}"
+        blob = bucket.blob(f"{folder_name}/{filename}")
+        blob.upload_from_file(file.stream, content_type=file.content_type)
+        blob.make_public()
+        return blob.public_url
+    return ''
+
+# ====== Email Notification ======
+def send_email_notification(data):
+    msg = EmailMessage()
+    msg['Subject'] = '📨 มีการขอใบเสนอราคาใหม่จาก Sale'
+    msg['From'] = "noreply@motorsas.com"
+    msg['To'] = "Somyot@synergy-as.com"
+    msg['Cc'] = "traiwit@synergy-as.com, kongkiat@synergy-as.com"
+
+    content = f"""
+    📌 Sale: {data['sale_name']}
+    👤 ลูกค้า: {data['customer_name']}
+    📞 เบอร์: {data['phone']}
+    🏢 บริษัท: {data['company']}
+    🎯 วัตถุประสงค์: {data['purpose']}
+    📅 เวลา: {data['timestamp']}
+    """
+    msg.set_content(content)
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+            smtp.starttls()
+            smtp.login("Somyotsw442@gmail.com", "dfwj earf bvuj jcrv")
+            smtp.send_message(msg)
+    except Exception as e:
+        print("Error sending email:", e)
+
+# ====== Routes ======
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -27,10 +65,7 @@ def index():
 def request_list():
     try:
         quotations = ref.get()
-        if quotations:
-            sorted_data = sorted(quotations.items(), key=lambda x: x[1]['timestamp'], reverse=True)
-        else:
-            sorted_data = []
+        sorted_data = sorted(quotations.items(), key=lambda x: x[1]['timestamp'], reverse=True) if quotations else []
         return render_template('dashboard.html', quotations=sorted_data)
     except Exception as e:
         return f"Error loading data: {str(e)}"
@@ -55,8 +90,6 @@ def submit():
         "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
-    # Upload optional files
-    bucket = storage.bucket()
     file_fields = {
         'old_model_image': 'old_model_image_url',
         'motor_image': 'motor_image_url',
@@ -67,18 +100,10 @@ def submit():
     for field, url_key in file_fields.items():
         file = request.files.get(field)
         if file and file.filename:
-            filename = secure_filename(file.filename)
-            blob = bucket.blob(f"uploads/{filename}")
-            blob.upload_from_file(file)
-            blob.make_public()
-            data[url_key] = blob.public_url
+            data[url_key] = upload_file_to_firebase(file, "uploads")
 
-    # Save to Firebase
-    new_ref = ref.push(data)
-
-    # Email Notification
+    ref.push(data)
     send_email_notification(data)
-
     return redirect('/request')
 
 @app.route('/update_status/<quote_id>', methods=['POST'])
@@ -99,31 +124,6 @@ def update_status(quote_id):
         })
 
     return redirect('/request')
-
-def send_email_notification(data):
-    msg = EmailMessage()
-    msg['Subject'] = '📨 มีการขอใบเสนอราคาใหม่จาก Sale'
-    msg['From'] = "noreply@motorsas.com"
-    msg['To'] = "Somyot@synergy-as.com"
-    msg['Cc'] = "traiwit@synergy-as.com, kongkiat@synergy-as.com"
-
-    content = f"""
-    📌 Sale: {data['sale_name']}
-    👤 ลูกค้า: {data['customer_name']}
-    📞 เบอร์: {data['phone']}
-    🏢 บริษัท: {data['company']}
-    🎯 วัตถุประสงค์: {data['purpose']}
-    📅 เวลา: {data['timestamp']}
-    """
-    msg.set_content(content)
-
-    try:
-        with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
-            smtp.starttls()
-            smtp.login("Somyotsw442@gmail.com", "dfwj earf bvuj jcrv")  # คุณสามารถเปลี่ยนมาใช้ตัวแปร env หรือ secrets ใน production
-            smtp.send_message(msg)
-    except Exception as e:
-        print("Error sending email:", e)
 
 if __name__ == '__main__':
     if not os.path.exists('uploads'):
