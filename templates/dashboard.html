@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - SAS Transmission</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>📊 รายการคำขอใบเสนอราคา</h2>
+    <table border="1" width="100%" cellpadding="10" cellspacing="0">
+      <thead>
+        <tr style="background:#e0e0e0">
+          <th>Sale</th>
+          <th>ชื่อลูกค้า</th>
+          <th>บริษัท</th>
+          <th>วันเวลา</th>
+          <th>สถานะ</th>
+          <th>แนบใบเสนอราคา</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+        <tr>
+          <td>{{ entry.sale_name }}</td>
+          <td>{{ entry.customer_name }}</td>
+          <td>{{ entry.customer_company }}</td>
+          <td>{{ entry.timestamp | safe }}</td>
+          <td>
+            {% if entry.status == 'waiting' %}
+              <span style="color:white; background:red; padding:5px 10px; border-radius:8px;">รอใบเสนอราคา</span>
+            {% else %}
+              <span style="color:white; background:green; padding:5px 10px; border-radius:8px;">ส่งแล้ว</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if entry.status == 'waiting' %}
+            <form action="/upload_pdf/{{ entry.id }}" method="POST" enctype="multipart/form-data">
+              <input type="file" name="pdf_file" accept="application/pdf" required>
+              <button type="submit">ส่ง</button>
+            </form>
+            {% else %}
+              <a href="{{ entry.quotation_pdf_url }}" target="_blank">ดูไฟล์</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <br><a href="/" class="button-outline">🔙 กลับหน้าแรก</a>
+  </div>
+</body>
+</html>

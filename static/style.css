@@ -1,0 +1,126 @@
+/* ===== Global Styles ===== */
+body {
+  background-color: #e3f2fd;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2 {
+  color: #0d47a1;
+  text-align: center;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* ===== Logo ===== */
+.logo {
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+/* ===== Center Layout ===== */
+.center {
+  text-align: center;
+  margin-top: 80px;
+}
+
+/* ===== Buttons ===== */
+.button, .button-outline {
+  display: inline-block;
+  margin: 10px;
+  padding: 15px 30px;
+  font-size: 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.button {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+}
+
+.button:hover {
+  background-color: #1976d2;
+}
+
+.button-outline {
+  border: 2px solid #2196f3;
+  color: #2196f3;
+  background-color: transparent;
+}
+
+.button-outline:hover {
+  background-color: #bbdefb;
+}
+
+/* ===== Form Container ===== */
+.form-container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="file"],
+input[type="number"],
+input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+input[type="radio"] {
+  margin-right: 8px;
+  margin-left: 20px;
+}
+
+hr {
+  margin: 20px 0;
+  border-top: 1px solid #ccc;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #64b5f6;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #42a5f5;
+}
+
+/* ===== Gear Background (Animated/Faded) ===== */
+.gear-bg {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  opacity: 0.06;
+  background: url('/static/gear.gif') no-repeat center center;
+  background-size: contain;
+  width: 200px;
+  height: 200px;
+  z-index: -1;
+}
