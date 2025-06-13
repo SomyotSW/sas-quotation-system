@@ -22,7 +22,7 @@ firebase_key = json.load(StringIO(firebase_key_str))
 
 cred = credentials.Certificate(firebase_key)
 firebase_admin.initialize_app(cred, {
-    'storageBucket': f"{os.getenv('FIREBASE_PROJECT_ID")}.appspot.com"
+    'storageBucket': f"{os.getenv('FIREBASE_PROJECT_ID')}.appspot.com"
 })
 db = firestore.client()
 bucket = storage.bucket()
