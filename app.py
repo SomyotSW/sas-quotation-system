@@ -29,14 +29,13 @@ bucket = storage.bucket()
 
 # ====== Upload file to Firebase Storage ======
 def upload_file_to_firebase(file, folder_name="uploads"):
-    if file and file.filename != '':
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        blob = bucket.blob(f"{folder_name}/{timestamp}_{file.filename}")
-        blob.upload_from_file(file)
+    if file and file.filename:
+        # อ่านเนื้อไฟล์แบบ binary
+        blob = bucket.blob(f"{folder_name}/{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}")
+        blob.upload_from_file(file.stream, content_type=file.content_type)
         blob.make_public()
         return blob.public_url
     return ''
-
 # ====== Send Email Notification ======
 def send_notification_email(sale_name, customer_name, customer_company, pdf_url):
     msg = EmailMessage()
