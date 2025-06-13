@@ -1,87 +1,129 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>📊 สถานะใบเสนอราคา</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAS Transmission Request Quotation</title>
+  <link rel="stylesheet" href="/static/style.css" />
   <style>
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: #e3f2fd url('/static/gear.gif') no-repeat center center fixed;
+      background-size: cover;
     }
-    .blink-red {
-      color: red;
-      font-weight: bold;
-      animation: blink 0.6s infinite;
+    .form-container {
+      max-width: 1000px;
+      margin: 60px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 200px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 20px;
     }
     th, td {
       padding: 10px;
       border: 1px solid #ccc;
       text-align: center;
     }
-    th {
-      background-color: #e0e0e0;
+    .button-outline {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 8px 16px;
+      border: 2px solid #1976d2;
+      background: none;
+      color: #1976d2;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: 0.3s;
+    }
+    .button-outline:hover {
+      background: #1976d2;
+      color: #fff;
+    }
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+    .no-data-message {
+      text-align: center;
+      color: red;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="form-container">
-    <h2>📋 รายการคำขอใบเสนอราคา</h2>
+    <img src="/static/sas-logo.png" alt="SAS Logo" class="logo" />
+    <h2>📋 Dashboard - สถานะใบเสนอราคา</h2>
 
     <table>
       <thead>
         <tr>
+          <th>📅 เวลา</th>
           <th>Sale</th>
           <th>ลูกค้า</th>
           <th>บริษัท</th>
-          <th>วันเวลา</th>
           <th>สถานะ</th>
-          <th>แนบใบเสนอราคา</th>
+          <th>📎 ใบเสนอราคา</th>
         </tr>
       </thead>
       <tbody>
-        {% if entries %}
-          {% for entry in entries %}
+        {% if quotations %}
+          {% for quote_id, data in quotations %}
           <tr>
-            <td>{{ entry.sale_name }}</td>
-            <td>{{ entry.customer_name }}</td>
-            <td>{{ entry.customer_company }}</td>
-            <td>{{ entry.timestamp }}</td>
+            <td>{{ data.timestamp }}</td>
+            <td>{{ data.sale_name }}</td>
+            <td>{{ data.customer_name }}</td>
+            <td>{{ data.company }}</td>
+            <td>{{ data.status }}</td>
             <td>
-              {% if entry.status == 'waiting' %}
-                <span style="color:white; background:red; padding:5px 10px; border-radius:8px;">รอใบเสนอราคา</span>
+              {% if data.quotation_file_url %}
+                <a href="{{ data.quotation_file_url }}" target="_blank">📄 ดาวน์โหลด</a>
               {% else %}
-                <span style="color:white; background:green; padding:5px 10px; border-radius:8px;">ส่งแล้ว</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if entry.status == 'waiting' %}
-                <form action="/upload_pdf/{{ entry.id }}" method="POST" enctype="multipart/form-data">
-                  <input type="file" name="pdf_file" accept="application/pdf" required>
-                  <button type="submit">ส่ง</button>
+                <form action="/update_status/{{ quote_id }}" method="POST" enctype="multipart/form-data">
+                  <input type="file" name="quotation_file" required />
+                  <button type="submit">📤 อัปโหลด</button>
                 </form>
-              {% else %}
-                <a href="{{ entry.quotation_pdf_url }}" target="_blank">ดูไฟล์</a>
               {% endif %}
             </td>
           </tr>
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="6">ยังไม่มีการขอใบเสนอราคาเข้ามาในระบบ</td>
+            <td colspan="6" class="no-data-message">
+              ยังไม่มีการขอใบเสนอราคาเข้ามาในระบบ<br>รอใครมาตัดริบบิ้นครับ ออกไปขายของได้แล้วครับ
+            </td>
           </tr>
           <tr>
-            <td colspan="6"><span class="blink-red">รอใครมาตัดริบบิ้นครับ ออกไปขายของได้แล้วครับ</span></td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
           </tr>
         {% endif %}
       </tbody>
     </table>
 
-    <br>
     <a href="/" class="button-outline">🔙 กลับหน้าแรก</a>
   </div>
 </body>

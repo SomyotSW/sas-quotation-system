@@ -1,140 +1,131 @@
-from flask import Flask, render_template, request, redirect, url_for
-import firebase_admin
-from firebase_admin import credentials, firestore, storage
-from dotenv import load_dotenv
-from datetime import datetime
+from flask import Flask, render_template, request, redirect
+from werkzeug.utils import secure_filename
 import os
-import json
-from io import StringIO
+import firebase_admin
+from firebase_admin import credentials, db, storage
+import datetime
 import smtplib
 from email.message import EmailMessage
 
-# Load .env
-load_dotenv()
-
-# Init Flask
 app = Flask(__name__)
-app.secret_key = os.getenv("Hihitler888")
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Init Firebase from ENV
-firebase_key_str = os.getenv("FIREBASE_KEY_JSON")
-firebase_key = json.load(StringIO(firebase_key_str))
-cred = credentials.Certificate(firebase_key)
+# Firebase setup
+cred = credentials.Certificate("firebase_config.json")
 firebase_admin.initialize_app(cred, {
-    'storageBucket': f"{os.getenv('FIREBASE_PROJECT_ID')}.appspot.com"
+    'databaseURL': 'https://sas-transmission.firebaseio.com/',
+    'storageBucket': 'sas-transmission.appspot.com'
 })
-db = firestore.client()
-bucket = storage.bucket()
 
-# ====== Upload file to Firebase ======
-def upload_file_to_firebase(file, folder_name="uploads"):
-    if file and hasattr(file, 'filename') and file.filename:
-        blob = bucket.blob(f"{folder_name}/{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}")
-        blob.upload_from_file(file.stream, content_type=file.content_type)
-        blob.make_public()
-        return blob.public_url
-    return ''
+ref = db.reference("/quotations")
 
-# ====== Send Email Notification ======
-def send_notification_email(sale_name, customer_name, customer_company, pdf_url):
-    msg = EmailMessage()
-    msg['Subject'] = f"[SAS] ใบเสนอราคาสำเร็จ - ลูกค้า {customer_company}"
-    msg['From'] = "somyotsw442@gmail.com"
-    msg['To'] = "Somyot@synergy-as.com"
-    msg['Cc'] = "traiwit@synergy-as.com, kongkiat@synergy-as.com"
-
-    body = f"""
-    📌 ใบเสนอราคาสำเร็จแล้ว
-
-    ▪️ Sale: {sale_name}
-    ▪️ ลูกค้า: {customer_name}
-    ▪️ บริษัท: {customer_company}
-    ▪️ Link: {pdf_url}
-
-    กรุณาตรวจสอบและติดตามผลการขายต่อไปครับ
-    """
-    msg.set_content(body)
-
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-        smtp.login('somyotsw442@gmail.com', 'dfwj earf bvuj jcrv')
-        smtp.send_message(msg)
-
-# ====== Home ======
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# ====== Request Form ======
-@app.route('/request', methods=['GET', 'POST'])
-def request_form():
-    if request.method == 'POST':
-        form = request.form
-        files = request.files
+@app.route('/request')
+def request_list():
+    try:
+        quotations = ref.get()
+        if quotations:
+            sorted_data = sorted(quotations.items(), key=lambda x: x[1]['timestamp'], reverse=True)
+        else:
+            sorted_data = []
+        return render_template('dashboard.html', quotations=sorted_data)
+    except Exception as e:
+        return f"Error loading data: {str(e)}"
 
-        image_model_url = upload_file_to_firebase(files.get('image_model'), "model")
-        image_motor_url = upload_file_to_firebase(files.get('image_motor'), "motor")
-        image_ratio_url = upload_file_to_firebase(files.get('image_ratio'), "ratio")
-        install_direction_url = upload_file_to_firebase(files.get('install_direction'), "install")
+@app.route('/submit', methods=['POST'])
+def submit():
+    data = {
+        "sale_name": request.form.get("sale_name"),
+        "customer_name": request.form.get("customer_name"),
+        "phone": request.form.get("phone"),
+        "company": request.form.get("company"),
+        "purpose": request.form.get("purpose"),
+        "old_model": request.form.get("old_model"),
+        "motor_w": request.form.get("motor_w"),
+        "motor_hp": request.form.get("motor_hp"),
+        "motor_kw": request.form.get("motor_kw"),
+        "ratio": request.form.get("ratio"),
+        "shaft_size": request.form.get("shaft_size"),
+        "no_shaft_info": request.form.get("no_shaft_info") == "true",
+        "no_install_info": request.form.get("no_install_info") == "true",
+        "status": "รอใบเสนอราคา",
+        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
 
-        data = {
-            'sale_name': form.get('sale_name', ''),
-            'customer_name': form.get('customer_name', ''),
-            'phone': form.get('phone', ''),
-            'customer_company': form.get('customer_company', ''),
-            'purpose': form.get('purpose', ''),
-            'model_old': form.get('model_old', ''),
-            'motor_w': form.get('motor_w', ''),
-            'motor_hp': form.get('motor_hp', ''),
-            'motor_kw': form.get('motor_kw', ''),
-            'ratio': form.get('ratio', ''),
-            'shaft': form.get('shaft', ''),
-            'timestamp': datetime.now().isoformat(),
-            'status': 'waiting',
-            'image_model_url': image_model_url,
-            'image_motor_url': image_motor_url,
-            'image_ratio_url': image_ratio_url,
-            'install_direction_url': install_direction_url
-        }
+    # Upload optional files
+    bucket = storage.bucket()
+    file_fields = {
+        'old_model_image': 'old_model_image_url',
+        'motor_image': 'motor_image_url',
+        'ratio_image': 'ratio_image_url',
+        'install_image': 'install_image_url'
+    }
 
-        db.collection('quotations').add(data)
-        return redirect(url_for('index'))
+    for field, url_key in file_fields.items():
+        file = request.files.get(field)
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            blob = bucket.blob(f"uploads/{filename}")
+            blob.upload_from_file(file)
+            blob.make_public()
+            data[url_key] = blob.public_url
 
-    return render_template('request_form.html')
+    # Save to Firebase
+    new_ref = ref.push(data)
 
-# ====== Dashboard ======
-@app.route('/dashboard')
-def dashboard():
-    docs = db.collection('quotations').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
-    entries = [doc.to_dict() | {'id': doc.id} for doc in docs]
-    return render_template('dashboard.html', entries=entries)
+    # Email Notification
+    send_email_notification(data)
 
-# ====== Upload Quotation PDF ======
-@app.route('/upload_pdf/<doc_id>', methods=['POST'])
-def upload_pdf(doc_id):
-    pdf_file = request.files['pdf_file']
-    if not pdf_file or not pdf_file.filename:
-        return "No PDF selected", 400
+    return redirect('/request')
 
-    pdf_url = upload_file_to_firebase(pdf_file, folder_name="quotation_pdf")
+@app.route('/update_status/<quote_id>', methods=['POST'])
+def update_status(quote_id):
+    file = request.files.get("quotation_file")
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
 
-    doc_ref = db.collection('quotations').document(doc_id)
-    doc = doc_ref.get()
-    if doc.exists:
-        data = doc.to_dict()
-        doc_ref.update({
-            'status': 'sent',
-            'quotation_pdf_url': pdf_url
+        blob = storage.bucket().blob(f"quotations/{filename}")
+        blob.upload_from_filename(filepath)
+        blob.make_public()
+
+        ref.child(quote_id).update({
+            "status": "ส่งแล้ว",
+            "quotation_file_url": blob.public_url
         })
 
-        send_notification_email(
-            sale_name=data.get('sale_name'),
-            customer_name=data.get('customer_name'),
-            customer_company=data.get('customer_company'),
-            pdf_url=pdf_url
-        )
+    return redirect('/request')
 
-    return redirect(url_for('dashboard'))
+def send_email_notification(data):
+    msg = EmailMessage()
+    msg['Subject'] = '📨 มีการขอใบเสนอราคาใหม่จาก Sale'
+    msg['From'] = "noreply@motorsas.com"
+    msg['To'] = "Somyot@synergy-as.com"
+    msg['Cc'] = "traiwit@synergy-as.com, kongkiat@synergy-as.com"
 
-# ====== Run Local ======
+    content = f"""
+    📌 Sale: {data['sale_name']}
+    👤 ลูกค้า: {data['customer_name']}
+    📞 เบอร์: {data['phone']}
+    🏢 บริษัท: {data['company']}
+    🎯 วัตถุประสงค์: {data['purpose']}
+    📅 เวลา: {data['timestamp']}
+    """
+    msg.set_content(content)
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+            smtp.starttls()
+            smtp.login("Somyotsw442@gmail.com", "dfwj earf bvuj jcrv")  # คุณสามารถเปลี่ยนมาใช้ตัวแปร env หรือ secrets ใน production
+            smtp.send_message(msg)
+    except Exception as e:
+        print("Error sending email:", e)
+
 if __name__ == '__main__':
+    if not os.path.exists('uploads'):
+        os.makedirs('uploads')
     app.run(debug=True)

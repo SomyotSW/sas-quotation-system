@@ -3,56 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ขอใบเสนอราคา</title>
+  <title>SAS Transmission Request Quotation</title>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: #e3f2fd url('/static/gear.gif') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .form-container {
+      max-width: 800px;
+      margin: 60px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 200px;
+    }
+    label {
+      font-weight: bold;
+    }
+    .required {
+      color: red;
+      font-weight: bold;
+    }
+    .button-outline {
+      margin-top: 20px;
+    }
+    @media (max-width: 768px) {
+      .form-container {
+        padding: 10px;
+        margin: 20px 10px;
+      }
+      input, select, textarea, button {
+        width: 100%;
+        font-size: 16px;
+      }
+      h2 {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="form-container">
-    <h2>📤 ฟอร์มขอใบเสนอราคา</h2>
-    <form method="POST" enctype="multipart/form-data">
-      <label>ชื่อ Sale</label>
-      <input type="text" name="sale_name">
+    <img src="/static/sas-logo.png" alt="SAS Logo" class="logo">
+    <h2>📤 แบบฟอร์มขอใบเสนอราคา</h2>
+    <form action="/submit" method="post" enctype="multipart/form-data">
+      <label>ชื่อ Sale <span class="required">*</span></label><br>
+      <input type="text" name="sale_name" required><br><br>
 
-      <label>ชื่อลูกค้า</label>
-      <input type="text" name="customer_name">
+      <label>ชื่อลูกค้า</label><br>
+      <input type="text" name="customer_name"><br><br>
 
-      <label>เบอร์โทรลูกค้า</label>
-      <input type="text" name="phone">
+      <label>เบอร์ติดต่อ</label><br>
+      <input type="text" name="phone"><br><br>
 
-      <label>ชื่อบริษัทลูกค้า</label>
-      <input type="text" name="customer_company">
+      <label>ชื่อบริษัทลูกค้า</label><br>
+      <input type="text" name="company"><br><br>
 
-      <label>วัตถุประสงค์</label>
-      <select name="purpose">
-        <option value="">-- เลือก --</option>
-        <option value="new_build">งานสร้างใหม่</option>
-        <option value="replacement">ทดแทนของเดิม</option>
-      </select>
+      <label>วัตถุประสงค์ <span class="required">*</span></label><br>
+      <input type="radio" name="purpose" value="สร้างเครื่องจักรใหม่" required> สร้างเครื่องจักรใหม่<br>
+      <input type="radio" name="purpose" value="วางแทนของเดิม" required> วางแทนของเดิม<br><br>
 
-      <label>ชื่อ Model ของเดิม (ถ้ามี)</label>
-      <input type="text" name="model_old">
-      <label style="color:red;">* แนบรูป Model (ถ้ามี)</label>
-      <input type="file" name="image_model" accept="image/*">
+      <label>Model ของเดิม (ถ้ามี) หรือแนบรูป <span class="required">* ต้องแนบรูปถ้ารู้</span></label><br>
+      <input type="text" name="old_model"><br>
+      <input type="file" name="old_model_image"><br><br>
 
-      <label>Motor (W / HP / KW)</label>
-      <input type="text" name="motor_w" placeholder="Watt">
-      <input type="text" name="motor_hp" placeholder="HP">
-      <input type="text" name="motor_kw" placeholder="KW">
-      <input type="file" name="image_motor" accept="image/*">
+      <label>Motor:</label><br>
+      <input type="text" name="motor_w" placeholder="W"> 
+      <input type="text" name="motor_hp" placeholder="HP"> 
+      <input type="text" name="motor_kw" placeholder="kW"><br>
+      <input type="file" name="motor_image"><br><br>
 
-      <label>Gear Ratio</label>
-      <input type="text" name="ratio">
-      <input type="file" name="image_ratio" accept="image/*">
+      <label>Gear Head Ratio:</label><br>
+      <input type="text" name="ratio"><br>
+      <input type="file" name="ratio_image"><br><br>
 
-      <label>ขนาดเพลา</label>
-      <input type="text" name="shaft">
+      <label>ขนาดเพลา:</label><br>
+      <input type="text" name="shaft_size">
+      <input type="checkbox" name="no_shaft_info" value="true"> ไม่มีข้อมูล<br><br>
 
-      <label>แนวการติดตั้ง (แนบรูป)</label>
-      <input type="file" name="install_direction" accept="image/*">
-      <p style="color:red;">* ข้อมูลจำเป็นในการเลือก Spec ให้ตรงที่สุด</p>
+      <label>ทิศทางการติดตั้ง: <span class="required">* จำเป็นในการเลือก Spec ที่เหมาะสม</span></label><br>
+      <input type="file" name="install_image"><br>
+      <input type="checkbox" name="no_install_info" value="true"> ไม่มีข้อมูล<br><br>
 
-      <button type="submit">ส่งข้อมูล</button>
+      <button type="submit">📨 ส่งข้อมูล</button>
     </form>
+
     <a href="/" class="button-outline">🔙 กลับหน้าแรก</a>
   </div>
 </body>

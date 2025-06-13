@@ -3,14 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SAS Quotation</title>
+  <title>SAS Transmission Request Quotation</title>
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: #d0e7ff url('/static/assets/bg-gear.gif') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .form-container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 200px;
+    }
+    .button-outline {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: 2px solid #007bff;
+      background-color: white;
+      color: #007bff;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+    }
+    .button-outline:hover {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
 </head>
 <body>
   <div class="form-container">
-    <h2>📦 ระบบขอใบเสนอราคา</h2>
+    <img src="/static/assets/sas-logo.png" alt="SAS Logo" class="logo">
+    <h2>📦 SAS Transmission Request Quotation</h2>
     <p>เลือกเมนูด้านล่าง</p>
-    <a href="/request" class="button-outline">📤 ขอใบเสนอราคา</a><br><br>
+    <a href="/request" class="button-outline">📤 ขอใบเสนอราคา</a>
     <a href="/dashboard" class="button-outline">📊 สถานะใบเสนอราคา</a>
   </div>
 </body>
