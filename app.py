@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 # Firebase setup
-cred = credentials.Certificate("firebase_config.json")
+cred = credentials.Certificate("sas-transmission-firebase-adminsdk-fbsvc-964d6b7952.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://sas-transmission.firebaseio.com/',
     'storageBucket': 'sas-transmission.appspot.com'
