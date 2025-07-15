@@ -35,11 +35,12 @@ def send_email_notification(data):
     msg = EmailMessage()
     msg['Subject'] = '📨 มีการขอใบเสนอราคาใหม่จาก Sale'
     msg['From'] = "noreply@motorsas.com"
-    msg['To'] = "Somyot@synergy-as.com"
-    msg['Cc'] = "traiwit@synergy-as.com, kongkiat@synergy-as.com"
+    msg['To'] = "Somyot@synergy-as.com, sas06@synergy-as.com, sas04@synergy-as.com"
+    msg['Cc'] = ""
 
     content = f"""
     📌 Sale: {data['sale_name']}
+    📧 อีเมล Sale: {data['sale_email']}
     👤 ลูกค้า: {data['customer_name']}
     📞 เบอร์: {data['phone']}
     🏢 บริษัท: {data['company']}
@@ -74,6 +75,7 @@ def request_list():
 def submit():
     data = {
         "sale_name": request.form.get("sale_name"),
+        "sale_email": request.form.get("sale_email"),
         "customer_name": request.form.get("customer_name"),
         "phone": request.form.get("phone"),
         "company": request.form.get("company"),

@@ -10,7 +10,7 @@
       margin: 0;
       padding: 0;
       font-family: sans-serif;
-      background: #e3f2fd url('/static/gear.gif') no-repeat center center fixed;
+      background: #e3f2fd url('/static/BG.png') no-repeat center center fixed;
       background-size: cover;
     }
     .form-container {
@@ -58,6 +58,9 @@
     <form action="/submit" method="post" enctype="multipart/form-data">
       <label>ชื่อ Sale <span class="required">*</span></label><br>
       <input type="text" name="sale_name" required><br><br>
+
+      <label>อีเมลของ Sale <span class="required">*</span></label><br>
+      <input type="email" name="sale_email" required><br><br>
 
       <label>ชื่อลูกค้า</label><br>
       <input type="text" name="customer_name"><br><br>
