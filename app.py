@@ -58,18 +58,23 @@ def send_email_notification(data):
         print("Error sending email:", e)
 
 # ====== Routes ======
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/request')
-def request_list():
+@app.route('/form')
+def form():
+    return render_template('request_form.html')
+
+@app.route('/dashboard')
+def dashboard():
     try:
         quotations = ref.get()
         sorted_data = sorted(quotations.items(), key=lambda x: x[1]['timestamp'], reverse=True) if quotations else []
         return render_template('dashboard.html', quotations=sorted_data)
     except Exception as e:
-        return f"Error loading data: {str(e)}"
+        return f"Error loading dashboard: {str(e)}"
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -106,7 +111,7 @@ def submit():
 
     ref.push(data)
     send_email_notification(data)
-    return redirect('/request')
+    return redirect('/dashboard')
 
 @app.route('/update_status/<quote_id>', methods=['POST'])
 def update_status(quote_id):
@@ -125,7 +130,7 @@ def update_status(quote_id):
             "quotation_file_url": blob.public_url
         })
 
-    return redirect('/request')
+    return redirect('/dashboard')
 
 if __name__ == '__main__':
     if not os.path.exists('uploads'):
