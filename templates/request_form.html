@@ -1,106 +1,176 @@
 <!DOCTYPE html>
+
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SAS Transmission Request Quotation</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>SAS Transmission Request Quotation</title>
+<style>
     body {
-      margin: 0;
-      padding: 0;
       font-family: sans-serif;
       background: #e3f2fd url('/static/BG.png') no-repeat center center fixed;
       background-size: cover;
+      margin: 0;
+      padding: 0;
     }
+
     .form-container {
       max-width: 800px;
-      margin: 60px auto;
+      margin: 40px auto;
       background: rgba(255, 255, 255, 0.95);
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     }
-    .logo {
-      display: block;
-      margin: 0 auto 20px;
-      max-width: 200px;
+
+    input[type="text"],
+    input[type="email"],
+    input[type="file"],
+    textarea,
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 15px;
     }
+
     label {
       font-weight: bold;
+      display: block;
+      margin-top: 10px;
     }
-    .required {
-      color: red;
-      font-weight: bold;
+
+    input[type="radio"] {
+      margin-right: 5px;
     }
-    .button-outline {
-      margin-top: 20px;
+
+    button[type="submit"] {
+      margin-top: 15px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
     }
+
+    button[type="submit"]:hover {
+      background-color: #125ea8;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
     @media (max-width: 768px) {
-      .form-container {
-        padding: 10px;
-        margin: 20px 10px;
-      }
       input, select, textarea, button {
-        width: 100%;
         font-size: 16px;
       }
-      h2 {
-        font-size: 20px;
-      }
     }
-  </style>
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: inherit;
+  backdrop-filter: blur(8px);
+  z-index: -1;
+}
+
+.logo-sas {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  width: 120px;
+  opacity: 0.85;
+}
+</style>
 </head>
-<body>
-  <div class="form-container">
-    <img src="/static/sas-logo.png" alt="SAS Logo" class="logo">
-    <h2>📤 แบบฟอร์มขอใบเสนอราคา</h2>
-    <form action="/submit" method="post" enctype="multipart/form-data">
-      <label>ชื่อ Sale <span class="required">*</span></label><br>
-      <input type="text" name="sale_name" required><br><br>
+<body><img class="logo-sas" src="/static/logo_sas.png"/>
+<div class="form-container"><h2 style="text-align: center; color: #0d47a1; margin-bottom: 20px;">SAS Request Quotation Form</h2>
+<form enctype="multipart/form-data" id="quoteForm" method="post">
+<div class="customer-fields">
+<label>Email Sale:</label>
+<input name="sale_email" required="" type="email"/>
+<label>ชื่อลูกค้า:</label>
+<input name="customer_name" required="" type="text"/>
+<label>เบอร์ติดต่อลูกค้า:</label>
+<input name="customer_phone" required="" type="text"/>
+<label>ชื่อบริษัทลูกค้า:</label>
+<input name="customer_company" required="" type="text"/>
+</div>
+<label>วัตถุประสงค์ <span style="color:red">*</span></label>
+<input name="purpose" onchange="togglePurpose()" type="radio" value="สร้างเครื่องจักรใหม่"/> สร้างเครื่องจักรใหม่
+      <input name="purpose" onchange="togglePurpose()" type="radio" value="วางแทนของเดิม"/> วางแทนของเดิม
 
-      <label>อีเมลของ Sale <span class="required">*</span></label><br>
-      <input type="email" name="sale_email" required><br><br>
+      <div id="new-machine-fields" style="display: none;">
+<label>ขนาดมอเตอร์ หรือ Model ที่ต้องการ:</label>
+<input name="motor_model" type="text"/>
+<label>หน่วย:</label><br/>
+<input name="motor_unit" type="radio" value="W"/> W
+        <input name="motor_unit" type="radio" value="HP"/> HP
+        <input name="motor_unit" type="radio" value="kW"/> kW<br/><br/>
+<label>อัตราทด (i):</label>
+<input name="gear_ratio" type="text"/><br/><br/>
+<label>Speed controller หรือ Driver:</label><br/>
+<input name="controller" type="radio" value="Yes"/> Yes
+        <input name="controller" type="radio" value="No need"/> No need<br/><br/>
+<label>ข้อมูลที่จำเป็นอื่น ๆ (ไม่เกิน 500 ตัวอักษร):</label><br/>
+<textarea maxlength="500" name="other_info" rows="4"></textarea><br/><br/>
+</div>
+<div id="existing-fields">
+<label>แนบรูปภาพรุ่นเก่า:</label>
+<input name="old_model_image" required="" type="file"/>
+<label>แนบภาพมอเตอร์:</label>
+<input name="motor_image" required="" type="file"/>
+<label>แนบภาพอัตราทด:</label>
+<input name="ratio_image" required="" type="file"/>
+<label>แนบภาพตำแหน่งติดตั้ง:</label>
+<input name="install_image" required="" type="file"/>
+</div>
+<label><strong>ต้องการใบเสนอราคา:</strong></label><br/>
+<div style="display: flex; gap: 10px;">
+<label>
+<input checked="" name="quotation_speed" type="radio" value="normal"/>
+          ปกติ 1 วัน
+        </label>
+<label>
+<input name="quotation_speed" type="radio" value="urgent"/>
+<span style="color:red; font-weight:bold; animation: blink 1s step-start 0s infinite;">ด่วนที่สุด (ภายใน 15 นาที)</span>
+</label>
+</div>
+<button type="submit">ส่งข้อมูล</button>
+</form>
+<audio id="submitSound" preload="auto" src="/static/sounds/success.mp3"></audio>
+</div>
+<script>
+    function togglePurpose() {
+      const selected = document.querySelector('input[name="purpose"]:checked');
+      const isNew = selected && selected.value === "สร้างเครื่องจักรใหม่";
+      document.getElementById("new-machine-fields").style.display = isNew ? "block" : "none";
+      document.getElementById("existing-fields").style.display = isNew ? "none" : "block";
+    }
 
-      <label>ชื่อลูกค้า</label><br>
-      <input type="text" name="customer_name"><br><br>
-
-      <label>เบอร์ติดต่อ</label><br>
-      <input type="text" name="phone"><br><br>
-
-      <label>ชื่อบริษัทลูกค้า</label><br>
-      <input type="text" name="company"><br><br>
-
-      <label>วัตถุประสงค์ <span class="required">*</span></label><br>
-      <input type="radio" name="purpose" value="สร้างเครื่องจักรใหม่" required> สร้างเครื่องจักรใหม่<br>
-      <input type="radio" name="purpose" value="วางแทนของเดิม" required> วางแทนของเดิม<br><br>
-
-      <label>Model ของเดิม (ถ้ามี) หรือแนบรูป <span class="required">* ต้องแนบรูปถ้ารู้</span></label><br>
-      <input type="text" name="old_model"><br>
-      <input type="file" name="old_model_image"><br><br>
-
-      <label>Motor:</label><br>
-      <input type="text" name="motor_w" placeholder="W"> 
-      <input type="text" name="motor_hp" placeholder="HP"> 
-      <input type="text" name="motor_kw" placeholder="kW"><br>
-      <input type="file" name="motor_image"><br><br>
-
-      <label>Gear Head Ratio:</label><br>
-      <input type="text" name="ratio"><br>
-      <input type="file" name="ratio_image"><br><br>
-
-      <label>ขนาดเพลา:</label><br>
-      <input type="text" name="shaft_size">
-      <input type="checkbox" name="no_shaft_info" value="true"> ไม่มีข้อมูล<br><br>
-
-      <label>ทิศทางการติดตั้ง: <span class="required">* จำเป็นในการเลือก Spec ที่เหมาะสม</span></label><br>
-      <input type="file" name="install_image"><br>
-      <input type="checkbox" name="no_install_info" value="true"> ไม่มีข้อมูล<br><br>
-
-      <button type="submit">📨 ส่งข้อมูล</button>
-    </form>
-
-    <a href="/" class="button-outline">🔙 กลับหน้าแรก</a>
-  </div>
-</body>
+    document.getElementById("quoteForm").addEventListener("submit", function () {
+      const btn = this.querySelector("button[type='submit']");
+      btn.disabled = true;
+      btn.innerText = "⏳ กำลังส่งข้อมูล...";
+      document.getElementById("submitSound").play();
+    });
+  
+window.addEventListener('DOMContentLoaded', function () {
+  const welcome = document.getElementById("welcomeSound");
+  if (welcome) welcome.play();
+});
+</script>
+<audio id="welcomeSound" preload="auto" src="/static/sounds/welcome.mp3"></audio></body>
 </html>
