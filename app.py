@@ -52,7 +52,7 @@ def send_email_notification(data):
     try:
         with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
             smtp.starttls()
-            smtp.login("Somyotsw442@gmail.com", "dfwj earf bvuj jcrv")
+            smtp.login("Somyotsw442@gmail.com", "dfwj earf bvuj jcrv")  # 🛑 ควรเก็บใน environment variable
             smtp.send_message(msg)
     except Exception as e:
         print("Error sending email:", e)
@@ -121,7 +121,7 @@ def update_status(quote_id):
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
-        blob = storage.bucket().blob(f"quotations/{filename}")
+        blob = bucket.blob(f"quotations/{filename}")
         blob.upload_from_filename(filepath)
         blob.make_public()
 
