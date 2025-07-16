@@ -14,7 +14,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 cred = credentials.Certificate("sas-transmission-firebase-adminsdk-fbsvc-964d6b7952.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://sas-transmission.firebaseio.com/',
-    'storageBucket': 'sas-transmission.appspot.com'
+    'storageBucket': 'sas-transmission.firebasestorage.app'
 })
 
 ref = db.reference("/quotations")
