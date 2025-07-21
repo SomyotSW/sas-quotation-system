@@ -4,14 +4,21 @@ import os
 import firebase_admin
 from firebase_admin import credentials, db, storage
 import datetime
+from datetime import datetime
 import smtplib
 from email.message import EmailMessage
-from generate_pdf import generate_pdf  # <== ฟังก์ชันสร้าง PDF
+from dotenv import load_dotenv
+from generate_pdf import generate_pdf  # ฟังก์ชันสร้าง PDF
+
+# ==== โหลด ENV สำหรับอีเมล ====
+load_dotenv()
+EMAIL_USER = os.getenv("EMAIL_USER")
+EMAIL_PASS = os.getenv("EMAIL_PASS")
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Firebase setup
+# ====== Firebase setup ======
 cred = credentials.Certificate("sas-transmission-firebase-adminsdk-fbsvc-964d6b7952.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://sas-transmission.asia-southeast1.firebasedatabase.app/',
@@ -24,7 +31,7 @@ bucket = storage.bucket()
 # ====== Upload file to Firebase Storage ======
 def upload_file_to_firebase(file, folder_name="uploads"):
     if file and file.filename:
-        filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{secure_filename(file.filename)}"
+        filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{secure_filename(file.filename)}"
         blob = bucket.blob(f"{folder_name}/{filename}")
         blob.upload_from_file(file.stream, content_type=file.content_type)
         blob.make_public()
@@ -35,18 +42,21 @@ def upload_file_to_firebase(file, folder_name="uploads"):
 def send_email_notification(data, attach_pdf_path=None):
     msg = EmailMessage()
     msg['Subject'] = '📨 ขอใบเสนอราคา SAS Transmission'
-    msg['From'] = "noreply@motorsas.com"
-    msg['To'] = "Somyot@synergy-as.com, sas06@synergy-as.com, sas04@synergy-as.com"
-    msg['Cc'] = ""
+    msg['From'] = EMAIL_USER
+    msg['To'] = "sas06@synergy-as.com"
+    msg['Cc'] = "sas04@synergy-as.com"
 
     content = f"""
-    📌 Sale: {data['sale_name']}
-    📧 อีเมล Sale: {data['sale_email']}
-    👤 ลูกค้า: {data['customer_name']}
-    📞 เบอร์: {data['phone']}
-    🏢 บริษัท: {data['company']}
-    🎯 วัตถุประสงค์: {data['purpose']}
-    📅 เวลา: {data['timestamp']}
+📌 ชื่อเซลล์: {data.get('sale_name', '-')}
+📧 อีเมลเซลล์: {data.get('sale_email', '-')}
+👤 ชื่อลูกค้า: {data.get('customer_name', '-')}
+📞 เบอร์โทรลูกค้า: {data.get('phone', '-')}
+🏢 บริษัทลูกค้า: {data.get('company', '-')}
+🎯 วัตถุประสงค์: {data.get('purpose', '-')}
+🚀 ความเร่งด่วน: {data.get('quotation_speed', '-')}
+📅 เวลาที่ส่ง: {data.get('timestamp', '-')}
+
+🔗 ลิงก์ไฟล์ PDF: {data.get('pdf_url', '-')}
     """
     msg.set_content(content)
 
@@ -57,13 +67,12 @@ def send_email_notification(data, attach_pdf_path=None):
     try:
         with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
             smtp.starttls()
-            smtp.login("Somyotsw442@gmail.com", "dfwj earf bvuj jcrv")  # แนะนำให้ใช้ .env
+            smtp.login(EMAIL_USER, EMAIL_PASS)
             smtp.send_message(msg)
     except Exception as e:
-        print("Error sending email:", e)
+        print("❌ Error sending email:", e)
 
 # ====== Routes ======
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -100,6 +109,7 @@ def submit():
         "status": "รอใบเสนอราคา"
     }
 
+    # ====== อัปโหลดไฟล์แนบ ======
     file_fields = {
         'old_model_image': 'old_model_image_url',
         'motor_image': 'motor_image_url',
@@ -120,8 +130,10 @@ def submit():
     blob.make_public()
     data["pdf_url"] = blob.public_url
 
+    # ====== บันทึกลง Firebase และส่งอีเมล ======
     ref.push(data)
     send_email_notification(data, attach_pdf_path=pdf_path)
+
     return redirect('/dashboard')
 
 @app.route('/update_status/<quote_id>', methods=['POST'])
