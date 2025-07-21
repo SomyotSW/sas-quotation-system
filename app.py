@@ -41,12 +41,12 @@ def upload_file_to_firebase(file, folder_name="uploads"):
     return ''
 
 # ===== Email Sender =====
-def send_email_notification(data, attach_pdf_path=None):
+def send_email_notification(data, attach_pdf_path=None, receiver=None):
     msg = EmailMessage()
     msg['Subject'] = '📨 ขอใบเสนอราคา SAS Transmission'
     msg['From'] = EMAIL_USER
-    msg['To'] = "Somyot@synergy-as.com"
-    msg['Cc'] = "sas04@synergy-as.com","sas06@synergy-as.com"
+    msg['To'] = receiver if receiver else "Somyot@synergy-as.com"
+    msg['Cc'] = "sas04@synergy-as.com, sas06@synergy-as.com"
 
     content = f"""
 📌 ชื่อเซลล์: {data.get('sale_name', '-')}
@@ -54,9 +54,9 @@ def send_email_notification(data, attach_pdf_path=None):
 👤 ชื่อลูกค้า: {data.get('customer_name', '-')}
 📞 เบอร์โทรลูกค้า: {data.get('phone', '-')}
 🏢 บริษัทลูกค้า: {data.get('company', '-')}
-🎯 วัตถุประสงค์: {data.get('purpose', '-')}
+🌟 วัตถุประสงค์: {data.get('purpose', '-')}
 🚀 ความเร่งด่วน: {data.get('quotation_speed', '-')}
-📅 เวลาที่ส่ง: {data.get('timestamp', '-')}
+🗓️ เวลาที่ส่ง: {data.get('timestamp', '-')}
 
 🔗 ลิงก์ไฟล์ PDF: {data.get('pdf_url', '-')}
     """
@@ -100,8 +100,8 @@ def dashboard():
 def submit():
     try:
         print("\n🟢 ==== [START] /submit ==== 🟢")
-        print("📥 Form Data:", request.form)
-        print("📎 Files:", request.files)
+        print("📅 Form Data:", request.form)
+        print("📌 Files:", request.files)
 
         data = {
             "sale_name": request.form.get("sale_name"),
@@ -120,7 +120,6 @@ def submit():
             "status": "รอใบเสนอราคา"
         }
 
-        # ==== Upload Images ====
         file_fields = {
             'old_model_image': 'old_model_image_url',
             'motor_image': 'motor_image_url',
@@ -133,7 +132,6 @@ def submit():
             if file and file.filename:
                 data[url_key] = upload_file_to_firebase(file, "uploads")
 
-        # ==== Generate PDF ====
         pdf_path = generate_pdf(data)
         print(f"📄 PDF Generated: {pdf_path}")
         pdf_filename = os.path.basename(pdf_path)
@@ -143,11 +141,9 @@ def submit():
         data["pdf_url"] = blob.public_url
         print(f"✅ PDF Uploaded to Firebase: {data['pdf_url']}")
 
-        # ==== Save to Firebase DB ====
         ref.push(data)
         print("✅ Data pushed to Firebase Realtime DB.")
 
-        # ==== Send Email ====
         send_email_notification(data, attach_pdf_path=pdf_path)
 
         print("🟢 ==== [END] /submit ==== 🟢\n")
@@ -159,9 +155,25 @@ def submit():
 
 @app.route('/update_status/<quote_id>', methods=['POST'])
 def update_status(quote_id):
+    allowed_emails = [
+        "Somyot@synergy-as.com",
+        "sas06@synergy-as.com",
+        "sas04@synergy-as.com"
+    ]
+    allowed_extensions = ['.pdf', '.xlsx', '.xls']
+
+    uploader_email = request.form.get("uploader_email", "").strip()
     file = request.files.get("quotation_file")
+
+    if uploader_email not in allowed_emails:
+        return "คุณไม่มีสิทธิ์อัปโหลดใบเสนอราคา", 403
+
     if not file or not file.filename:
-        return "No file selected", 400
+        return "กรุณาเลือกไฟล์", 400
+
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_extensions:
+        return "สามารถอัปโหลดได้เฉพาะไฟล์ PDF หรือ Excel เท่านั้น", 400
 
     try:
         filename = secure_filename(file.filename)
@@ -171,11 +183,19 @@ def update_status(quote_id):
         blob = bucket.blob(f"quotations/{filename}")
         blob.upload_from_filename(filepath)
         blob.make_public()
+        quotation_url = blob.public_url
 
-        ref.child(quote_id).update({
+        quote_ref = ref.child(quote_id)
+        current_data = quote_ref.get()
+        sale_email = current_data.get('sale_email')
+
+        quote_ref.update({
             "status": "ส่งแล้ว",
-            "quotation_file_url": blob.public_url
+            "quotation_file_url": quotation_url,
+            "uploader_email": uploader_email
         })
+
+        send_email_notification(current_data, attach_pdf_path=filepath, receiver=sale_email)
 
         return redirect('/dashboard')
 

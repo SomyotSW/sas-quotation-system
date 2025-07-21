@@ -3,128 +3,183 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SAS Transmission Request Quotation</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <title>SAS Transmission Dashboard</title>
   <style>
     body {
+      font-family: sans-serif;
+      background: #e3f2fd url('/static/BG.png') no-repeat center center fixed;
+      background-size: cover;
       margin: 0;
       padding: 0;
-      font-family: sans-serif;
-      background: #e3f2fd url('/static/gear.gif') no-repeat center center fixed;
-      background-size: cover;
+      position: relative;
     }
-    .form-container {
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      backdrop-filter: blur(6px);
+      z-index: -1;
+    }
+
+    .container {
       max-width: 1000px;
-      margin: 60px auto;
-      background: rgba(255, 255, 255, 0.95);
+      margin: auto;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.95);
+      margin-top: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    .logo {
-      display: block;
-      margin: 0 auto 20px;
-      max-width: 200px;
+
+    h2 {
+      text-align: center;
+      color: #0d47a1;
+      margin-bottom: 20px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
+
     th, td {
-      padding: 10px;
+      padding: 12px;
       border: 1px solid #ccc;
       text-align: center;
+      vertical-align: top;
     }
-    .button-outline {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 8px 16px;
-      border: 2px solid #1976d2;
-      background: none;
-      color: #1976d2;
-      text-decoration: none;
-      border-radius: 6px;
-      transition: 0.3s;
+
+    form {
+      margin-top: 10px;
     }
-    .button-outline:hover {
-      background: #1976d2;
-      color: #fff;
+
+    input[type="email"],
+    input[type="file"] {
+      width: 100%;
+      padding: 6px;
+      margin-bottom: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
     }
+
     button {
       background-color: #1976d2;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       padding: 6px 12px;
       cursor: pointer;
     }
+
     button:hover {
-      background-color: #1565c0;
+      background-color: #125ea8;
     }
-    .no-data-message {
+
+    .info {
+      font-size: 0.9em;
+      color: #333;
+      margin-top: 4px;
+    }
+
+    .no-data {
       text-align: center;
       color: red;
       font-weight: bold;
     }
+
+    .back-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 8px 16px;
+      border: 2px solid #1976d2;
+      color: #1976d2;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+
+    .back-button:hover {
+      background-color: #1976d2;
+      color: white;
+    }
+
+    .logo-sas {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 120px;
+      opacity: 0.9;
+      z-index: 10;
+    }
+
+    @media screen and (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      th {
+        text-align: left;
+        background: #f0f0f0;
+      }
+      td {
+        margin-bottom: 10px;
+      }
+      table {
+        margin-top: 0;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <img src="/static/sas-logo.png" alt="SAS Logo" class="logo" />
-    <h2>📋 Dashboard - สถานะใบเสนอราคา</h2>
+  <img src="/static/sas-logo.png" alt="SAS Logo" class="logo-sas" />
+
+  <div class="container">
+    <h2>📋 รายการคำขอใบเสนอราคา</h2>
 
     <table>
       <thead>
         <tr>
-          <th>📅 เวลา</th>
-          <th>Sale</th>
-          <th>ลูกค้า</th>
-          <th>บริษัท</th>
-          <th>สถานะ</th>
-          <th>📎 ใบเสนอราคา</th>
+          <th>📅 วันที่ขอ</th>
+          <th>Sale Name</th>
+          <th>Start</th>
+          <th>Status</th>
+          <th>ใบเสนอราคา</th>
         </tr>
       </thead>
       <tbody>
         {% if quotations %}
           {% for quote_id, data in quotations %}
-          <tr>
-            <td>{{ data.timestamp }}</td>
-            <td>{{ data.sale_name }}</td>
-            <td>{{ data.customer_name }}</td>
-            <td>{{ data.company }}</td>
-            <td>{{ data.status }}</td>
-            <td>
-              {% if data.quotation_file_url %}
-                <a href="{{ data.quotation_file_url }}" target="_blank">📄 ดาวน์โหลด</a>
-              {% else %}
-                <form action="/update_status/{{ quote_id }}" method="POST" enctype="multipart/form-data">
-                  <input type="file" name="quotation_file" required />
-                  <button type="submit">📤 อัปโหลด</button>
-                </form>
-              {% endif %}
-            </td>
-          </tr>
+            <tr>
+              <td>{{ data.timestamp }}</td>
+              <td>{{ data.company }}</td>
+              <td>{{ data.start_count or '-' }}</td>
+              <td>{{ data.status }}</td>
+              <td>
+                {% if data.quotation_file_url %}
+                  <div class="info">📬 ส่งไฟล์กลับให้: {{ data.sale_email }}</div>
+                  <div class="info">👤 ผู้แนบ: {{ data.uploader_email or 'ไม่ระบุ' }}</div>
+                {% else %}
+                  <form action="/update_status/{{ quote_id }}" method="POST" enctype="multipart/form-data">
+                    <input type="email" name="uploader_email" placeholder="อีเมลผู้แนบ" required />
+                    <input type="file" name="quotation_file" accept=".pdf,.xlsx,.xls" required />
+                    <button type="submit">📤 อัปโหลด</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="6" class="no-data-message">
-              ยังไม่มีการขอใบเสนอราคาเข้ามาในระบบ<br>รอใครมาตัดริบบิ้นครับ ออกไปขายของได้แล้วครับ
+            <td colspan="5" class="no-data">
+              SAS Transmission รอใบเสนอราคาจากท่านอยู่...
             </td>
-          </tr>
-          <tr>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
           </tr>
         {% endif %}
       </tbody>
     </table>
 
-    <a href="/" class="button-outline">🔙 กลับหน้าแรก</a>
+    <a href="/" class="back-button">🔙 กลับหน้าแรก</a>
   </div>
 </body>
 </html>
