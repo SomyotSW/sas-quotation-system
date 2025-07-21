@@ -23,7 +23,7 @@ print("📦 Initializing Firebase...")
 cred = credentials.Certificate("sas-transmission-firebase-adminsdk-fbsvc-964d6b7952.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://sas-transmission.asia-southeast1.firebasedatabase.app/',
-    'storageBucket': 'sas-transmission.appspot.com'
+    'storageBucket': 'sas-transmission.firebasestorage.app'
 })
 ref = db.reference("/quotations")
 bucket = storage.bucket()
