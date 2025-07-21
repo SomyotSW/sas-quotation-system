@@ -7,6 +7,7 @@ from reportlab.lib.utils import ImageReader
 import tempfile
 import requests
 from PIL import Image
+from io import BytesIO
 import os
 
 # ลงทะเบียนฟอนต์ไทย
@@ -27,40 +28,30 @@ def generate_pdf(data):
     c.drawString(2 * cm, y, "📌 รายการขอใบเสนอราคาจาก Sale")
     y -= 2 * cm
 
-    # ==== ข้อมูลทั่วไป ====
+    # ==== ข้อมูลใบเสนอราคา ====
     y = draw_text("Speed Controller / Driver", data.get("controller", ""), y)
     y = draw_text("อัตราทด", data.get("ratio", ""), y)
     y = draw_text("Model ที่ต้องการ", data.get("motor_model", ""), y)
     y = draw_text("หน่วย (W/HP/kW)", data.get("motor_unit", ""), y)
     y = draw_text("ข้อมูลจำเป็นอื่น ๆ", data.get("other_info", ""), y)
     y = draw_text("ประเภทใบเสนอราคา", data.get("quotation_speed", ""), y)
-    
-    c.setFont("THSarabunNew", 16)
-    y = draw_text("Sale", data.get("sale_name", ""), y)
-    y = draw_text("อีเมล Sale", data.get("sale_email", ""), y)
-    y = draw_text("ลูกค้า", data.get("customer_name", ""), y)
-    y = draw_text("เบอร์โทร", data.get("phone", ""), y)
-    y = draw_text("บริษัท", data.get("company", ""), y)
-    y = draw_text("วัตถุประสงค์", data.get("purpose", ""), y)
-    y = draw_text("วันที่", data.get("timestamp", ""), y)
     y -= 1 * cm
 
-    # ==== ข้อมูลมอเตอร์ ====
-    y = draw_text("Old Model", data.get("old_model", ""), y)
-    y = draw_text("Motor W", data.get("motor_w", ""), y)
-    y = draw_text("Motor HP", data.get("motor_hp", ""), y)
-    y = draw_text("Motor kW", data.get("motor_kw", ""), y)
-    y = draw_text("Ratio", data.get("ratio", ""), y)
-    y = draw_text("Shaft Size", data.get("shaft_size", ""), y)
+    # ==== ข้อมูลลูกค้า / เซลล์ ====
+    y = draw_text("ชื่อเซลล์", data.get("sale_name", ""), y)
+    y = draw_text("อีเมลเซลล์", data.get("sale_email", ""), y)
+    y = draw_text("ชื่อลูกค้า", data.get("customer_name", ""), y)
+    y = draw_text("เบอร์โทร", data.get("phone", ""), y)
+    y = draw_text("บริษัทลูกค้า", data.get("company", ""), y)
+    y = draw_text("วัตถุประสงค์", data.get("purpose", ""), y)
+    y = draw_text("วันที่ส่งข้อมูล", data.get("timestamp", ""), y)
     y -= 1 * cm
 
     # ==== แนบรูปภาพ ====
     def draw_image_from_url(url, label, y):
         try:
             response = requests.get(url)
-            img = Image.open(tempfile.SpooledTemporaryFile())
-            img.fp.write(response.content)
-            img.fp.seek(0)
+            img = Image.open(BytesIO(response.content))
             img = ImageReader(img)
             c.drawString(2 * cm, y, label)
             y -= 0.7 * cm
