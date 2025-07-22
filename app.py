@@ -47,8 +47,8 @@ def upload_file_to_firebase(file, folder_name="uploads"):
 # Send email with optional attachments
 def send_email_notification(data, attach_pdf_path=None, attach_extra_path=None, attach_images=None):
     msg = EmailMessage()
-    msg['Subject'] = f"📨 ขอใบเสนอราคา ({product})"
     product = data.get('product_type')
+    msg['Subject'] = f"📨 ขอใบเสนอราคา ({product})"
 
     # Determine recipients based on product
     if product == 'Gear Motor':
