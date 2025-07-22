@@ -2,7 +2,7 @@ import edge_tts
 import asyncio
 
 async def generate_voice():
-    text = "ยินดีต้อนรับ ขอให้วันนี้เป็นวันที่ดี มีความสุขกับการขายมอเตอร์เกียร์ SAS นะคะ"
+    text = "ยินดีต้อนรับ ขอให้วันนี้เป็นวันที่ดี มีความสุขกับการขายสินค้าของเรานะคะ"
     voice = "th-TH-PremwadeeNeural"  # เสียงผู้หญิงไทยที่เหมือนคนจริงมาก
     output_path = "welcome.mp3"
 
