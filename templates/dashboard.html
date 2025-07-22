@@ -13,7 +13,6 @@
       padding: 0;
       position: relative;
     }
-
     body::before {
       content: "";
       position: fixed;
@@ -21,7 +20,6 @@
       backdrop-filter: blur(6px);
       z-index: -1;
     }
-
     .container {
       max-width: 1000px;
       margin: auto;
@@ -31,36 +29,30 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
     h2 {
       text-align: center;
       color: #0d47a1;
       margin-bottom: 20px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
-
     th, td {
       padding: 12px;
       border: 1px solid #ccc;
       text-align: center;
       vertical-align: top;
     }
-
     th {
       background: #f0f0f0;
     }
-
     .no-data {
       text-align: center;
       color: red;
       font-weight: bold;
     }
-
     .back-button {
       display: inline-block;
       margin-top: 20px;
@@ -70,12 +62,10 @@
       text-decoration: none;
       border-radius: 6px;
     }
-
     .back-button:hover {
       background-color: #1976d2;
       color: white;
     }
-
     .logo-sas {
       position: fixed;
       top: 10px;
@@ -84,23 +74,12 @@
       opacity: 0.9;
       z-index: 10;
     }
-
     @media screen and (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      th {
-        text-align: left;
-      }
-      td {
-        margin-bottom: 10px;
-      }
-      table {
-        margin-top: 0;
-      }
+      table, thead, tbody, th, td, tr { display: block; }
+      th { text-align: left; }
+      td { margin-bottom: 10px; }
+      table { margin-top: 0; }
     }
-
-    /* Blinking status */
     @keyframes blinkStatus {
       0%   { color: red; }
       50%  { color: yellow; }
@@ -126,52 +105,66 @@
           <th>Product</th>
           <th>Start</th>
           <th>Status</th>
-          <th>ไฟล์แนบ/ใบเสนอราคา</th>
+          <th>อัปโหลดไฟล์</th>
+          <th>ดาวน์โหลด</th>
         </tr>
       </thead>
       <tbody>
         {% if quotations %}
           {% for quote_id, data in quotations %}
             <tr>
-              <!-- วันที่ขอ -->
               <td>{{ data.timestamp }}</td>
-
-              <!-- ชื่อ Sale -->
               <td>{{ data.sale_name }}</td>
-
-              <!-- Product -->
               <td>{{ data.product_type }}</td>
-
-              <!-- Start: realtime นับตั้งแต่ timestamp -->
               <td class="start-count" data-start="{{ data.timestamp }}"></td>
+              <td class="{% if data.status == 'รอใบเสนอราคา' %}status-wait{% endif %}">{{ data.status }}</td>
 
-              <!-- Status -->
-              <td class="{% if data.status == 'รอใบเสนอราคา' %}status-wait{% endif %}">
-                {{ data.status }}
+              <!-- Upload form -->
+              <td>
+                {% if not data.quotation_file_url %}
+                  <form action="/update_status/{{ quote_id }}" method="POST" enctype="multipart/form-data">
+                    <label>อีเมลผู้ส่ง:</label><br/>
+                    <select name="uploader_email" required>
+                      <option value="">-- เลือกอีเมล --</option>
+                      {% if data.product_type == 'Gear Motor' %}
+                        <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
+                        <option value="sas04@synergy-as.com">sas04@synergy-as.com</option>
+                        <option value="sas06@synergy-as.com">sas06@synergy-as.com</option>
+                      {% elif data.product_type == 'Conveyor & Automation' %}
+                        <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
+                        <option value="matinee@synergy-as.com">matinee@synergy-as.com</option>
+                        <option value="wiroj@synergy-as.com">wiroj@synergy-as.com</option>
+                      {% elif data.product_type == 'Structure' %}
+                        <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
+                        <option value="design_pp@hotmail.com">design_pp@hotmail.com</option>
+                        <option value="designsas2024@gmail.com">designsas2024@gmail.com</option>
+                        <option value="tanin@synergy-as.com">tanin@synergy-as.com</option>
+                        <option value="Sukitkongprom@gmail.com">Sukitkongprom@gmail.com</option>
+                        <option value="SAS03@synergy-as.com">SAS03@synergy-as.com</option>
+                      {% endif %}
+                    </select><br/>
+                    <label>ไฟล์ (.pdf, .xls, .xlsx):</label><br/>
+                    <input type="file" name="quotation_file" accept=".pdf,.xls,.xlsx" required/><br/>
+                    <button type="submit">ส่ง</button>
+                  </form>
+                {% else %}
+                  -
+                {% endif %}
               </td>
 
-              <!-- Attachment / PDF / Final quotation -->
+              <!-- Download link -->
               <td>
                 {% if data.quotation_file_url %}
-                  <div class="info">📬 ส่งไฟล์กลับให้: {{ data.sale_email }}</div>
-                  <div class="info">👤 ผู้แนบ: {{ data.uploader_email or 'ไม่ระบุ' }}</div>
+                  <a href="{{ data.quotation_file_url }}" target="_blank">📥 ดาวน์โหลดไฟล์</a>
                 {% else %}
-                  {% if data.pdf_url %}
-                    <a href="{{ data.pdf_url }}" target="_blank">📄 ดาวน์โหลด PDF</a>
-                  {% elif data.attachment_url %}
-                    <a href="{{ data.attachment_url }}" target="_blank">📎 ดูไฟล์แนบ</a>
-                  {% else %}
-                    -
-                  {% endif %}
+                  -
                 {% endif %}
               </td>
             </tr>
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="6" class="no-data">
-              SAS Transmission รอคำขอจากท่านอยู่...
-            </td>
+            <td colspan="7" class="no-data">SAS Transmission รอคำขอจากท่านอยู่...</td>
           </tr>
         {% endif %}
       </tbody>
@@ -185,23 +178,15 @@
       document.querySelectorAll('.start-count').forEach(td => {
         const ts = td.getAttribute('data-start');
         const startDate = new Date(ts);
-        if (isNaN(startDate)) {
-          td.textContent = '-';
-          return;
-        }
-        const now = new Date();
-        let diff = now - startDate;
-        const days = Math.floor(diff / (1000*60*60*24));
-        diff %= 1000*60*60*24;
-        const hours = Math.floor(diff / (1000*60*60));
-        diff %= 1000*60*60;
-        const mins = Math.floor(diff / (1000*60));
-        diff %= 1000*60;
-        const secs = Math.floor(diff / 1000);
+        if (isNaN(startDate)) { td.textContent = '-'; return; }
+        const now = new Date(); let diff = now - startDate;
+        const days = Math.floor(diff/(1000*60*60*24)); diff %= 1000*60*60*24;
+        const hours = Math.floor(diff/(1000*60*60)); diff %= 1000*60*60;
+        const mins = Math.floor(diff/(1000*60)); diff %= 1000*60;
+        const secs = Math.floor(diff/1000);
         td.textContent = days + 'd ' + hours + 'h ' + mins + 'm ' + secs + 's';
       });
     }
-
     setInterval(updateStartCounts, 1000);
     window.addEventListener('DOMContentLoaded', updateStartCounts);
   </script>
