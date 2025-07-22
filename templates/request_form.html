@@ -25,7 +25,6 @@
     input[type="text"],
     input[type="email"],
     input[type="file"],
-    textarea,
     select {
       padding: 10px;
       border-radius: 6px;
@@ -61,12 +60,8 @@
       background-color: #125ea8;
     }
 
-    textarea {
-      resize: vertical;
-    }
-
     @media (max-width: 768px) {
-      input, select, textarea, button {
+      input, select, button {
         font-size: 16px;
       }
     }
@@ -99,10 +94,9 @@
   <div class="form-container">
     <h2 style="text-align: center; color: #0d47a1; margin-bottom: 20px;">SAS Request Quotation Form</h2>
     <form enctype="multipart/form-data" id="quoteForm" method="post" action="/submit">
-      
       <!-- SAS Products Request -->
       <label>SAS Products Request <span style="color:red">*</span></label>
-      <select name="product_type" id="product_type" onchange="toggleFieldsByProduct()" required>
+      <select name="product_type" id="product_type" required>
         <option value="">-- กรุณาเลือก --</option>
         <option value="Gear Motor">1. Gear Motor</option>
         <option value="Conveyor & Automation">2. Conveyor & Automation</option>
@@ -110,74 +104,46 @@
       </select>
 
       <!-- Customer Info -->
-      <div class="customer-fields">
-        <label>Email Sale:</label>
-        <input name="sale_email" type="email" required />
-        <label>ชื่อเซลล์:</label>
-        <input name="sale_name" type="text" required />
-        <label>ชื่อลูกค้า:</label>
-        <input name="customer_name" type="text" required />
-        <label>เบอร์ติดต่อลูกค้า:</label>
-        <input name="customer_phone" type="text" required />
-        <label>ชื่อบริษัทลูกค้า:</label>
-        <input name="customer_company" type="text" required />
-      </div>
+      <label>Email Sale:</label>
+      <input name="sale_email" type="email" required />
+      <label>ชื่อเซลล์:</label>
+      <input name="sale_name" type="text" required />
+      <label>ชื่อลูกค้า:</label>
+      <input name="customer_name" type="text" required />
+      <label>เบอร์ติดต่อลูกค้า:</label>
+      <input name="customer_phone" type="text" required />
+      <label>ชื่อบริษัทลูกค้า:</label>
+      <input name="customer_company" type="text" required />
 
-      <!-- Purpose (for Gear Motor only) -->
-      <div id="purpose-group">
+      <!-- Purpose (Gear Motor only) -->
+      <div id="purpose-group" style="display:none;">
         <label>วัตถุประสงค์ <span style="color:red">*</span></label>
-        <input name="purpose" onchange="togglePurpose()" type="radio" value="สร้างเครื่องจักรใหม่" required/> สร้างเครื่องจักรใหม่
-        <input name="purpose" onchange="togglePurpose()" type="radio" value="วางแทนของเดิม"/> วางแทนของเดิม
+        <input name="purpose" id="purpose-new" type="radio" value="สร้างเครื่องจักรใหม่"/> สร้างเครื่องจักรใหม่
+        <input name="purpose" id="purpose-replace" type="radio" value="วางแทนของเดิม"/> วางแทนของเดิม
       </div>
 
-      <!-- Fields for "สร้างเครื่องจักรใหม่" -->
-      <div id="new-machine-fields" style="display: none;">
-        <label>ขนาดมอเตอร์ หรือ Model ที่ต้องการ:</label>
-        <input name="motor_model" type="text"/>
-        <label>หน่วย:</label><br/>
-        <input name="motor_unit" type="radio" value="W"/> W
-        <input name="motor_unit" type="radio" value="HP"/> HP
-        <input name="motor_unit" type="radio" value="kW"/> kW<br/><br/>
-        <label>อัตราทด (i):</label>
-        <input name="gear_ratio" type="text"/><br/><br/>
-        <label>Speed controller หรือ Driver:</label><br/>
-        <input name="controller" type="radio" value="Yes"/> Yes
-        <input name="controller" type="radio" value="No need"/> No need<br/><br/>
-        <label>ข้อมูลที่จำเป็นอื่น ๆ (ไม่เกิน 500 ตัวอักษร):</label><br/>
-        <textarea maxlength="500" name="other_info" rows="4"></textarea><br/><br/>
-      </div>
-
-      <!-- File uploads for existing machine (for Gear Motor only) -->
-      <div id="existing-fields">
+      <!-- File uploads for existing machine -->
+      <div id="existing-fields" style="display:none;">
         <label>แนบรูปภาพรุ่นเก่า:</label>
-        <input name="old_model_image" type="file" />
+        <input name="old_model_image" type="file" accept="image/*" />
         <label>แนบภาพมอเตอร์:</label>
-        <input name="motor_image" type="file" />
+        <input name="motor_image" type="file" accept="image/*" />
         <label>แนบภาพอัตราทด:</label>
-        <input name="ratio_image" type="file" />
+        <input name="ratio_image" type="file" accept="image/*" />
         <label>แนบภาพตำแหน่งติดตั้ง:</label>
-        <input name="install_image" type="file" />
+        <input name="install_image" type="file" accept="image/*" />
       </div>
 
-      <!-- Extra attachment (Excel/PDF) for Conveyor & Automation or Structure -->
-      <div id="extra-attachment" style="display: none;">
+      <!-- Extra attachment (Excel/PDF) -->
+      <div id="extra-attachment" style="display:none;">
         <label>แนบไฟล์รายละเอียดเพิ่มเติม (Excel หรือ PDF เท่านั้น):</label>
         <input type="file" name="extra_file" accept=".pdf,.xlsx,.xls" />
       </div>
 
       <!-- Quotation Speed -->
       <label><strong>ต้องการใบเสนอราคา:</strong></label><br/>
-      <div style="display: flex; gap: 10px;">
-        <label>
-          <input checked name="quotation_speed" type="radio" value="normal"/> ปกติ 1 วัน
-        </label>
-        <label>
-          <input name="quotation_speed" type="radio" value="urgent"/>
-          <span style="color:red; font-weight:bold; animation: blink 1s step-start 0s infinite;">
-            ด่วนที่สุด (ภายใน 15 นาที)
-          </span>
-        </label>
-      </div>
+      <label><input checked name="quotation_speed" type="radio" value="normal"/> ปกติ 1 วัน</label>
+      <label><input name="quotation_speed" type="radio" value="urgent"/> <span style="color:red; font-weight:bold; animation: blink 1s step-start infinite;">ด่วนที่สุด (ภายใน 15 นาที)</span></label>
 
       <button type="submit">ส่งข้อมูล</button>
     </form>
@@ -187,52 +153,54 @@
   </div>
 
   <script>
-    function togglePurpose() {
-      const selected = document.querySelector('input[name="purpose"]:checked');
-      const isNew = selected && selected.value === "สร้างเครื่องจักรใหม่";
-      document.getElementById("new-machine-fields").style.display = isNew ? "block" : "none";
-      document.getElementById("existing-fields").style.display = isNew ? "none" : "block";
-    }
+    const productSel = document.getElementById('product_type');
+    const purposeGroup = document.getElementById('purpose-group');
+    const existingFields = document.getElementById('existing-fields');
+    const extraAttach = document.getElementById('extra-attachment');
 
-    function toggleFieldsByProduct() {
-      const type = document.getElementById("product_type").value;
-      const isGear = (type === "Gear Motor");
-
-      // Purpose & machine fields only for Gear Motor
-      document.getElementById("purpose-group").style.display = isGear ? "block" : "none";
-      document.getElementById("new-machine-fields").style.display = "none";
-      document.getElementById("existing-fields").style.display = isGear ? "block" : "none";
-
-      // Extra attachment only for Conveyor & Automation or Structure
-      document.getElementById("extra-attachment").style.display =
-        (type === "Conveyor & Automation" || type === "Structure") ? "block" : "none";
-
-      // Reset any previously selected purpose
-      if (!isGear) {
-        document.querySelectorAll('input[name="purpose"]').forEach(r => r.checked = false);
+    function updateVisibility() {
+      const type = productSel.value;
+      if (type === 'Gear Motor') {
+        purposeGroup.style.display = 'block';
+        extraAttach.style.display = 'none';
+      } else if (type === 'Conveyor & Automation' || type === 'Structure') {
+        purposeGroup.style.display = 'none';
+        existingFields.style.display = 'none';
+        extraAttach.style.display = 'block';
+        // clear purpose
+        document.querySelectorAll('input[name="purpose"]').forEach(i=> i.checked=false);
+      } else {
+        purposeGroup.style.display = 'none';
+        existingFields.style.display = 'none';
+        extraAttach.style.display = 'none';
       }
     }
 
-    // Form submission handler
-    document.getElementById("quoteForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const form = this;
-      const btn = form.querySelector("button[type='submit']");
-      btn.disabled = true;
-      btn.innerText = "⏳ กำลังส่งข้อมูล...";
-      document.getElementById("submitSound").play();
+    productSel.addEventListener('change', updateVisibility);
 
-      alert("✅ ส่งคำขอเรียบร้อยแล้ว ขอบคุณที่ใช้บริการ SAS Transmission");
-      setTimeout(() => {
-        form.submit();
-      }, 500);
+    document.querySelectorAll('input[name="purpose"]').forEach(r=> {
+      r.addEventListener('change', ()=>{
+        if (r.value === 'วางแทนของเดิม' && r.checked) {
+          existingFields.style.display = 'block';
+        } else if (r.value === 'สร้างเครื่องจักรใหม่' && r.checked) {
+          existingFields.style.display = 'none';
+        }
+      });
     });
 
-    // On load: play welcome sound & initialize field visibility
-    window.addEventListener('DOMContentLoaded', function () {
-      const welcome = document.getElementById("welcomeSound");
-      if (welcome) welcome.play();
-      toggleFieldsByProduct();
+    // Submission handler
+    document.getElementById('quoteForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.innerText = '⏳ กำลังส่งข้อมูล...';
+      document.getElementById('submitSound').play();
+      setTimeout(()=> this.submit(), 500);
+    });
+
+    window.addEventListener('DOMContentLoaded', ()=>{
+      document.getElementById('welcomeSound').play();
+      updateVisibility();
     });
   </script>
 </body>
