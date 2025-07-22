@@ -5,98 +5,26 @@
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <title>SAS Transmission Dashboard</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #e3f2fd url('/static/BG.png') no-repeat center center fixed;
-      background-size: cover;
-      margin: 0;
-      padding: 0;
-      position: relative;
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      backdrop-filter: blur(6px);
-      z-index: -1;
-    }
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.95);
-      margin-top: 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #0d47a1;
-      margin-bottom: 20px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 12px;
-      border: 1px solid #ccc;
-      text-align: center;
-      vertical-align: top;
-    }
-    th {
-      background: #f0f0f0;
-    }
-    .no-data {
-      text-align: center;
-      color: red;
-      font-weight: bold;
-    }
-    .back-button {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 8px 16px;
-      border: 2px solid #1976d2;
-      color: #1976d2;
-      text-decoration: none;
-      border-radius: 6px;
-    }
-    .back-button:hover {
-      background-color: #1976d2;
-      color: white;
-    }
-    .logo-sas {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      width: 120px;
-      opacity: 0.9;
-      z-index: 10;
-    }
-    @media screen and (max-width: 768px) {
-      table, thead, tbody, th, td, tr { display: block; }
-      th { text-align: left; }
-      td { margin-bottom: 10px; }
-      table { margin-top: 0; }
-    }
-    @keyframes blinkStatus {
-      0%   { color: red; }
-      50%  { color: yellow; }
-      100% { color: red; }
-    }
-    .status-wait {
-      animation: blinkStatus 1s infinite;
-      font-weight: bold;
-    }
+    body { font-family: sans-serif; background: #e3f2fd url('/static/BG.png') no-repeat center center fixed; background-size: cover; margin: 0; padding: 0; position: relative; }
+    body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(6px); z-index: -1; }
+    .container { max-width: 1000px; margin: auto; padding: 20px; background: rgba(255, 255, 255, 0.95); margin-top: 40px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #0d47a1; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; border: 1px solid #ccc; text-align: center; vertical-align: top; }
+    th { background: #f0f0f0; }
+    .no-data { text-align: center; color: red; font-weight: bold; }
+    .back-button { display: inline-block; margin-top: 20px; padding: 8px 16px; border: 2px solid #1976d2; color: #1976d2; text-decoration: none; border-radius: 6px; }
+    .back-button:hover { background-color: #1976d2; color: white; }
+    .logo-sas { position: fixed; top: 10px; right: 10px; width: 120px; opacity: 0.9; z-index: 10; }
+    @media screen and (max-width: 768px) { table, thead, tbody, th, td, tr { display: block; } th { text-align: left; } td { margin-bottom: 10px; } table { margin-top: 0; } }
+    @keyframes blinkStatus { 0% { color: red; } 50% { color: yellow; } 100% { color: red; } }
+    .status-wait { animation: blinkStatus 1s infinite; font-weight: bold; }
   </style>
 </head>
 <body>
   <img src="/static/sas-logo.png" alt="SAS Logo" class="logo-sas" />
-
   <div class="container">
     <h2>📋 รายการคำขอใบเสนอราคา</h2>
-
     <table>
       <thead>
         <tr>
@@ -106,7 +34,6 @@
           <th>Start</th>
           <th>Status</th>
           <th>อัปโหลดไฟล์</th>
-          <th>ดาวน์โหลด</th>
         </tr>
       </thead>
       <tbody>
@@ -118,8 +45,6 @@
               <td>{{ data.product_type }}</td>
               <td class="start-count" data-start="{{ data.timestamp }}"></td>
               <td class="{% if data.status == 'รอใบเสนอราคา' %}status-wait{% endif %}">{{ data.status }}</td>
-
-              <!-- Upload form -->
               <td>
                 {% if not data.quotation_file_url %}
                   <form action="/update_status/{{ quote_id }}" method="POST" enctype="multipart/form-data">
@@ -151,28 +76,15 @@
                   -
                 {% endif %}
               </td>
-
-              <!-- Download link -->
-              <td>
-                {% if data.quotation_file_url %}
-                  <a href="{{ data.quotation_file_url }}" target="_blank">📥 ดาวน์โหลดไฟล์</a>
-                {% else %}
-                  -
-                {% endif %}
-              </td>
             </tr>
           {% endfor %}
         {% else %}
-          <tr>
-            <td colspan="7" class="no-data">SAS Transmission รอคำขอจากท่านอยู่...</td>
-          </tr>
+          <tr><td colspan="6" class="no-data">SAS Transmission รอคำขอจากท่านอยู่...</td></tr>
         {% endif %}
       </tbody>
     </table>
-
     <a href="/" class="back-button">🔙 กลับหน้าแรก</a>
   </div>
-
   <script>
     function updateStartCounts() {
       document.querySelectorAll('.start-count').forEach(td => {

@@ -31,6 +31,11 @@ bucket = storage.bucket()
 # Helper: upload file to Firebase Storage
 def upload_file_to_firebase(file, folder_name="uploads"):
     if file and file.filename:
+        # Reset stream position to beginning before uploading
+        try:
+            file.stream.seek(0)
+        except Exception:
+            pass
         fname = secure_filename(file.filename)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         blob = bucket.blob(f"{folder_name}/{timestamp}_{fname}")
