@@ -177,11 +177,10 @@ def update_status(quote_id):
 
     try:
         filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+       
 
         blob = bucket.blob(f"quotations/{filename}")
-        blob.upload_from_filename(filepath)
+	blob.upload_from_filename(filepath)
         blob.make_public()
         quotation_url = blob.public_url
 
