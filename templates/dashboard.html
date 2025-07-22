@@ -51,37 +51,8 @@
       vertical-align: top;
     }
 
-    form {
-      margin-top: 10px;
-    }
-
-    input[type="email"],
-    input[type="file"] {
-      width: 100%;
-      padding: 6px;
-      margin-bottom: 6px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
-    button {
-      background-color: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #125ea8;
-    }
-
-    .info {
-      font-size: 0.9em;
-      color: #333;
-      margin-top: 4px;
+    th {
+      background: #f0f0f0;
     }
 
     .no-data {
@@ -120,7 +91,6 @@
       }
       th {
         text-align: left;
-        background: #f0f0f0;
       }
       td {
         margin-bottom: 10px;
@@ -128,6 +98,17 @@
       table {
         margin-top: 0;
       }
+    }
+
+    /* Blinking status */
+    @keyframes blinkStatus {
+      0%   { color: red; }
+      50%  { color: yellow; }
+      100% { color: red; }
+    }
+    .status-wait {
+      animation: blinkStatus 1s infinite;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -142,6 +123,7 @@
         <tr>
           <th>📅 วันที่ขอ</th>
           <th>Sale Name</th>
+          <th>Product</th>
           <th>Start</th>
           <th>Status</th>
           <th>ใบเสนอราคา</th>
@@ -151,10 +133,24 @@
         {% if quotations %}
           {% for quote_id, data in quotations %}
             <tr>
-              <td>{{ data.timestamp }}</td>
-              <td>{{ data.company }}</td>
-              <td>{{ data.start_count or '-' }}</td>
-              <td>{{ data.status }}</td>
+              <!-- วันที่ขอ -->
+              <td>{{ data.timestamp_display }}</td>
+
+              <!-- ชื่อ Sale -->
+              <td>{{ data.sale_name }}</td>
+
+              <!-- Product จากฟอร์ม -->
+              <td>{{ data.product_type }}</td>
+
+              <!-- Start: realtime นับตั้งแต่ timestamp -->
+              <td class="start-count" data-start="{{ data.timestamp_iso }}"></td>
+
+              <!-- Status: ถ้าเป็นรอใบเสนอราคา ให้กระพริบ -->
+              <td class="{% if data.status == 'รอใบเสนอราคา' %}status-wait{% endif %}">
+                {{ data.status }}
+              </td>
+
+              <!-- ใบเสนอราคา / ฟอร์มอัปโหลด -->
               <td>
                 {% if data.quotation_file_url %}
                   <div class="info">📬 ส่งไฟล์กลับให้: {{ data.sale_email }}</div>
@@ -171,7 +167,7 @@
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="5" class="no-data">
+            <td colspan="6" class="no-data">
               SAS Transmission รอใบเสนอราคาจากท่านอยู่...
             </td>
           </tr>
@@ -181,5 +177,33 @@
 
     <a href="/" class="back-button">🔙 กลับหน้าแรก</a>
   </div>
+
+  <script>
+    function updateStartCounts() {
+      document.querySelectorAll('.start-count').forEach(td => {
+        const ts = td.getAttribute('data-start');
+        const startDate = new Date(ts);
+        if (isNaN(startDate)) {
+          td.textContent = '-';
+          return;
+        }
+        const now = new Date();
+        let diff = now - startDate;
+        const days = Math.floor(diff / (1000*60*60*24));
+        diff %= 1000*60*60*24;
+        const hours = Math.floor(diff / (1000*60*60));
+        diff %= 1000*60*60;
+        const mins = Math.floor(diff / (1000*60));
+        diff %= 1000*60;
+        const secs = Math.floor(diff / 1000);
+        td.textContent = 
+          days + 'd ' + hours + 'h ' + mins + 'm ' + secs + 's';
+      });
+    }
+
+    // เรียกทุก 1 วินาที
+    setInterval(updateStartCounts, 1000);
+    window.addEventListener('DOMContentLoaded', updateStartCounts);
+  </script>
 </body>
 </html>
