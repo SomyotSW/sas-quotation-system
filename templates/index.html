@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SAS Transmission Request Quotation</title>
-  <link rel="stylesheet" href="/static/style.css">
   <style>
     body {
       margin: 0;
@@ -13,6 +12,7 @@
       background: #d0e7ff url('/static/BG.png') no-repeat center center fixed;
       background-size: cover;
     }
+
     .form-container {
       max-width: 600px;
       margin: 60px auto;
@@ -22,11 +22,13 @@
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
+
     .logo {
       display: block;
       margin: 0 auto 20px;
       max-width: 200px;
     }
+
     .button-outline {
       display: inline-block;
       padding: 10px 20px;
@@ -37,20 +39,52 @@
       text-decoration: none;
       border-radius: 8px;
       transition: all 0.2s ease-in-out;
+      font-size: 16px;
     }
+
     .button-outline:hover {
       background-color: #007bff;
       color: white;
+    }
+
+    .claim-button {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border: 1px solid #888;
+      background-color: #ffeb3b;
+      color: #000;
+      border-radius: 20px;
+      text-decoration: none;
+      z-index: 999;
+      opacity: 0.85;
+    }
+
+    .claim-button:hover {
+      background-color: #ffc107;
+    }
+
+    @media (max-width: 768px) {
+      .button-outline {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="form-container">
     <img src="/static/sas-logo.png" alt="SAS Logo" class="logo">
-    <h2>📦 SAS Transmission Request Quotation</h2>
-    <p>เลือกเมนูด้านล่าง</p>
+    <h2>📦 SAS Transmission </h2>
+    <p>Drive to the future</p>
+
     <a href="/form" class="button-outline">📤 ขอใบเสนอราคา</a>
     <a href="/dashboard" class="button-outline">📊 สถานะใบเสนอราคา</a>
+    <a href="/product-status" class="button-outline">📦 สถานะสินค้า</a>
   </div>
+
+  <a href="/claim" class="claim-button">🔧 แจ้งเคลมสินค้า</a>
 </body>
 </html>
