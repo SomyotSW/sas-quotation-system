@@ -72,7 +72,8 @@ def send_email_notification(data, attach_pdf_path=None, attach_extra_path=None, 
 🏢 บริษัท: {data.get('company','-')}
 📦 สินค้า: {product}
 🎯 วัตถุประสงค์: {data.get('purpose','-')}
-🔧 Model/Unit: {data.get('motor_model','-')} / {data.get('motor_unit','-')}⚙️ อัตราทด: {data.get('ratio','-')}
+🔧 Model/Unit: {data.get('motor_model','-')} / {data.get('motor_unit','-')}
+⚙️ อัตราทด: {data.get('ratio','-')}
 🔌 Controller: {data.get('controller','-')}
 📝 ข้อมูลอื่นๆ: {data.get('other_info','-')}
 🚀 ความเร่งด่วน: {data.get('quotation_speed','-')}
@@ -113,13 +114,9 @@ def send_email_notification(data, attach_pdf_path=None, attach_extra_path=None, 
 
 # Routes
 @app.route('/')
-def index():
-    return render_template('index.html')
-
+def index(): return render_template('index.html')
 @app.route('/form')
-def form():
-    return render_template('request_form.html')
-
+def form(): return render_template('request_form.html')
 @app.route('/dashboard')
 def dashboard():
     quotations = ref.get() or {}
@@ -151,7 +148,7 @@ def submit():
         attach_extra = None
         attach_images = []
 
-        # Gear Motor: generate PDF
+        # If Gear Motor selected -> ALWAYS generate PDF regardless of purpose
         if data['product_type'] == 'Gear Motor':
             pdf_path = generate_pdf(data)
             blob = bucket.blob(f"pdf/{os.path.basename(pdf_path)}")
@@ -188,7 +185,7 @@ def submit():
 
 @app.route('/update_status/<quote_id>', methods=['POST'])
 def update_status(quote_id):
-    # ... unchanged ...
+    # existing update_status logic unchanged
     return redirect('/dashboard')
 
 if __name__ == '__main__':
