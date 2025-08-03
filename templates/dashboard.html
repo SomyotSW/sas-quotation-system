@@ -3,22 +3,136 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
-  <title>SAS Transmission Dashboard</title>
+  <title>Synergy Dashboard</title>
   <style>
-    body { font-family: sans-serif; background: #e3f2fd url('/static/BG.png') no-repeat center center fixed; background-size: cover; margin: 0; padding: 0; position: relative; }
-    body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(6px); z-index: -1; }
-    .container { max-width: 1000px; margin: auto; padding: 20px; background: rgba(255, 255, 255, 0.95); margin-top: 40px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #0d47a1; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 12px; border: 1px solid #ccc; text-align: center; vertical-align: top; }
-    th { background: #f0f0f0; }
-    .no-data { text-align: center; color: red; font-weight: bold; }
-    .back-button { display: inline-block; margin-top: 20px; padding: 8px 16px; border: 2px solid #1976d2; color: #1976d2; text-decoration: none; border-radius: 6px; }
-    .back-button:hover { background-color: #1976d2; color: white; }
-    .logo-sas { position: fixed; top: 10px; right: 10px; width: 120px; opacity: 0.9; z-index: 10; }
-    @media screen and (max-width: 768px) { table, thead, tbody, th, td, tr { display: block; } th { text-align: left; } td { margin-bottom: 10px; } table { margin-top: 0; } }
-    @keyframes blinkStatus { 0% { color: red; } 50% { color: yellow; } 100% { color: red; } }
-    .status-wait { animation: blinkStatus 1s infinite; font-weight: bold; }
+    body {
+      font-family: sans-serif;
+      background: #e3f2fd url('/static/BG.png') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      backdrop-filter: blur(6px);
+      z-index: -1;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      margin-top: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0d47a1;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 8px 6px;
+      border: 1px solid #ccc;
+      text-align: center;
+      vertical-align: top;
+      font-size: 13px;
+      word-break: break-word;
+    }
+    th:nth-child(1) { width: 100px; }
+    th:nth-child(2) { width: 120px; }
+    th:nth-child(3) { width: 100px; }
+    th:nth-child(4) { width: 110px; }
+    th:nth-child(5) { width: 100px; }
+    th:nth-child(6) { width: 80px; }
+    th:nth-child(7) { width: 110px; }
+    th:nth-child(8) { width: 200px; }
+    form input, form select, form button {
+      font-size: 12px;
+      padding: 5px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    form label {
+      font-size: 12px;
+      display: block;
+      text-align: left;
+      margin-bottom: 2px;
+    }
+    form button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    form button:hover {
+      background-color: #125ea8;
+    }
+    .no-data {
+      text-align: center;
+      color: red;
+      font-weight: bold;
+    }
+    .back-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 8px 16px;
+      border: 2px solid #1976d2;
+      color: #1976d2;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+    .back-button:hover {
+      background-color: #1976d2;
+      color: white;
+    }
+    .logo-sas {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 120px;
+      opacity: 0.9;
+      z-index: 10;
+    }
+    @keyframes blinkStatus {
+      0% { color: red; }
+      50% { color: yellow; }
+      100% { color: red; }
+    }
+    .status-wait {
+      animation: blinkStatus 1s infinite;
+      font-weight: bold;
+    }
+    @media screen and (max-width: 768px) {
+      table, thead, tbody, th, td, tr { display: block; width: 100%; }
+      th { text-align: left; background-color: #f0f0f0; }
+      td {
+        margin-bottom: 12px;
+        background: #fff;
+        border-radius: 6px;
+        padding: 10px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.05);
+      }
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 6px;
+        color: #0d47a1;
+      }
+    }
   </style>
 </head>
 <body>
@@ -28,11 +142,13 @@
     <table>
       <thead>
         <tr>
+          <th>🆔 No.</th>
           <th>📅 วันที่ขอ</th>
           <th>Sale Name</th>
           <th>Product</th>
           <th>Start</th>
           <th>Status</th>
+          <th>Recieved</th>
           <th>อัปโหลดไฟล์</th>
         </tr>
       </thead>
@@ -40,51 +156,85 @@
         {% if quotations %}
           {% for quote_id, data in quotations %}
             <tr>
-              <td>{{ data.timestamp }}</td>
-              <td>{{ data.sale_name }}</td>
-              <td>{{ data.product_type }}</td>
-              <td class="start-count" data-start="{{ data.timestamp }}"></td>
-              <td class="{% if data.status == 'รอใบเสนอราคา' %}status-wait{% endif %}">{{ data.status }}</td>
-              <td>
-                {% if not data.quotation_file_url %}
-                  <form action="/update_status/{{ quote_id }}" method="POST" enctype="multipart/form-data">
-                    <label>อีเมลผู้ส่ง:</label><br/>
-                    <select name="uploader_email" required>
-                      <option value="">-- เลือกอีเมล --</option>
-                      {% if data.product_type == 'Gear Motor' %}
-                        <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
-                        <option value="sas04@synergy-as.com">sas04@synergy-as.com</option>
-                        <option value="sas06@synergy-as.com">sas06@synergy-as.com</option>
-                      {% elif data.product_type == 'Conveyor & Automation' %}
-                        <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
-                        <option value="matinee@synergy-as.com">matinee@synergy-as.com</option>
-                        <option value="wiroj@synergy-as.com">wiroj@synergy-as.com</option>
-                      {% elif data.product_type == 'Structure' %}
-                        <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
-                        <option value="design_pp@hotmail.com">design_pp@hotmail.com</option>
-                        <option value="designsas2024@gmail.com">designsas2024@gmail.com</option>
-                        <option value="tanin@synergy-as.com">tanin@synergy-as.com</option>
-                        <option value="Sukitkongprom@gmail.com">Sukitkongprom@gmail.com</option>
-                        <option value="SAS03@synergy-as.com">SAS03@synergy-as.com</option>
-                      {% endif %}
-                    </select><br/>
-                    <label>ไฟล์ (.pdf, .xls, .xlsx):</label><br/>
-                    <input type="file" name="quotation_file" accept=".pdf,.xls,.xlsx" required/><br/>
-                    <button type="submit">ส่ง</button>
+              <td data-label="🆔 No.">{{ data.job_number }}</td>
+              <td data-label="📅 วันที่ขอ">{{ data.timestamp }}</td>
+              <td data-label="Sale Name">{{ data.sale_name }}</td>
+              <td data-label="Product">{{ data.product_type }}</td>
+              <td data-label="Start" class="start-count" data-start="{{ data.timestamp }}"></td>
+              <td data-label="Status" class="{% if data.status == 'รอใบเสนอราคา' %}status-wait{% endif %}">{{ data.status }}</td>
+              <td data-label="Recieved">
+                {% if not data.received_email %}
+                  <form action="/receive_job/{{ quote_id }}" method="POST">
+                    <input type="email" name="received_email" placeholder="Email ผู้รับงาน" required />
+                    <button type="submit">รับงาน</button>
                   </form>
                 {% else %}
-                  -
+                  {{ data.received_email }}
                 {% endif %}
+              </td>
+              <td data-label="อัปโหลดไฟล์">
+                <button type="button" onclick="toggleUpload('{{ quote_id }}')">➕</button>
+                <div id="upload-form-{{ quote_id }}" style="display:none; margin-top:6px;">
+                  {% if not data.quotation_file_url %}
+                    <form action="/update_status/{{ quote_id }}" method="POST" enctype="multipart/form-data">
+                      <label>อีเมลผู้ส่ง:</label>
+                      <select name="uploader_email" required>
+                        <option value="">-- เลือกอีเมล --</option>
+                        {% if data.product_type == 'Gear Motor' %}
+                          <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
+                          <option value="sas04@synergy-as.com">sas04@synergy-as.com</option>
+                          <option value="sas06@synergy-as.com">sas06@synergy-as.com</option>
+                        {% elif data.product_type == 'Conveyor & Automation' %}
+                          <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
+                          <option value="matinee@synergy-as.com">matinee@synergy-as.com</option>
+                          <option value="wiroj@synergy-as.com">wiroj@synergy-as.com</option>
+                        {% elif data.product_type == 'Structure' %}
+                          <option value="Somyot@synergy-as.com">Somyot@synergy-as.com</option>
+                          <option value="design_pp@hotmail.com">design_pp@hotmail.com</option>
+                          <option value="designsas2024@gmail.com">designsas2024@gmail.com</option>
+                          <option value="tanin@synergy-as.com">tanin@synergy-as.com</option>
+                          <option value="Sukitkongprom@gmail.com">Sukitkongprom@gmail.com</option>
+                          <option value="SAS03@synergy-as.com">SAS03@synergy-as.com</option>
+                        {% endif %}
+                      </select>
+                      <label>ไฟล์ (.pdf, .xls, .xlsx):</label>
+                      <input type="file" name="quotation_file" accept=".pdf,.xls,.xlsx" required/>
+                      <button type="submit">ส่ง</button>
+                    </form>
+                  {% else %}
+                    {% if data.received_email and not data.checked %}
+                      <form action="/check_file/{{ quote_id }}" method="POST" enctype="multipart/form-data">
+                        <label>สถานะการตรวจ:</label>
+                        <button type="submit" name="action" value="reject">❌ Reject</button>
+                        <input type="text" name="comment" placeholder="เหตุผล" />
+                        <button type="submit" name="action" value="approve">✅ ผ่าน</button>
+                        <input type="file" name="final_file" accept=".pdf,.xls,.xlsx" />
+                      </form>
+                    {% elif data.checked %}
+                      {{ data.checked_status }} {% if data.checked_comment %}- เหตุผล: {{ data.checked_comment }}{% endif %}
+                    {% endif %}
+                    {% if data.checked_status == 'ผ่าน' and not data.final_quotation_url %}
+                      <form action="/admin_upload/{{ quote_id }}" method="POST" enctype="multipart/form-data">
+                        <label>แนบใบเสนอราคา (PDF):</label>
+                        <input type="file" name="admin_quotation" accept=".pdf" required />
+                        <button type="submit">📤 ส่งกลับให้ Sale</button>
+                      </form>
+                    {% elif data.final_quotation_url %}
+                      <a href="{{ data.final_quotation_url }}" target="_blank">📎 ใบเสนอราคา</a>
+                    {% endif %}
+                  {% endif %}
+                </div>
               </td>
             </tr>
           {% endfor %}
         {% else %}
-          <tr><td colspan="6" class="no-data">SAS Transmission รอคำขอจากท่านอยู่...</td></tr>
+          <tr><td colspan="8" class="no-data">www.synergy-as.com</td></tr>
         {% endif %}
       </tbody>
     </table>
     <a href="/" class="back-button">🔙 กลับหน้าแรก</a>
   </div>
+
   <script>
     function updateStartCounts() {
       document.querySelectorAll('.start-count').forEach(td => {
@@ -99,6 +249,15 @@
         td.textContent = days + 'd ' + hours + 'h ' + mins + 'm ' + secs + 's';
       });
     }
+
+    function toggleUpload(quoteId) {
+      const div = document.getElementById('upload-form-' + quoteId);
+      const btn = div.previousElementSibling;
+      const isVisible = div.style.display === 'block';
+      div.style.display = isVisible ? 'none' : 'block';
+      btn.innerText = isVisible ? '➕' : '➖';
+    }
+
     setInterval(updateStartCounts, 1000);
     window.addEventListener('DOMContentLoaded', updateStartCounts);
   </script>
