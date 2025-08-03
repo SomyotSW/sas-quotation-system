@@ -128,16 +128,30 @@ def dashboard():
     sorted_data = sorted(quotations.items(), key=lambda x: x[1]['timestamp'], reverse=True)
     return render_template('dashboard.html', quotations=sorted_data)
 
+def generate_job_number(product_type, queue_number):
+    today = datetime.now().strftime("%d%m%y")  # เช่น 150868
+    prefix_map = {
+        'Gear Motor': 'GEA',
+        'Conveyor & Automation': 'AUT',
+        'Structure': 'STC'
+    }
+    code = prefix_map.get(product_type, 'XXX')
+    return f"SAS{code}{today}{str(queue_number).zfill(3)}"
+
+
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
         data = {
+	    all_quotes = ref.get() or {}
+            queue_number = len(all_quotes) + 1
             'sale_name': request.form.get('sale_name'),
             'sale_email': request.form.get('sale_email'),
             'customer_name': request.form.get('customer_name'),
             'phone': request.form.get('customer_phone'),
             'company': request.form.get('customer_company'),
             'product_type': request.form.get('product_type'),
+	        'job_number': generate_job_number(request.form.get('product_type'), queue_number),
             'purpose': request.form.get('purpose',''),
             'motor_model': request.form.get('motor_model',''),
             'motor_unit': request.form.get('motor_unit',''),
