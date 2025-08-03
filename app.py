@@ -142,9 +142,10 @@ def generate_job_number(product_type, queue_number):
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
+	all_quotes = ref.get() or {}
+        queue_number = len(all_quotes) + 1
+	
         data = {
-	    all_quotes = ref.get() or {}
-            queue_number = len(all_quotes) + 1
             'sale_name': request.form.get('sale_name'),
             'sale_email': request.form.get('sale_email'),
             'customer_name': request.form.get('customer_name'),
