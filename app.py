@@ -142,9 +142,9 @@ def generate_job_number(product_type, queue_number):
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
-	all_quotes = ref.get() or {}
+        all_quotes = ref.get() or {}
         queue_number = len(all_quotes) + 1
-	
+
         data = {
             'sale_name': request.form.get('sale_name'),
             'sale_email': request.form.get('sale_email'),
@@ -152,13 +152,13 @@ def submit():
             'phone': request.form.get('customer_phone'),
             'company': request.form.get('customer_company'),
             'product_type': request.form.get('product_type'),
-	        'job_number': generate_job_number(request.form.get('product_type'), queue_number),
-            'purpose': request.form.get('purpose',''),
-            'motor_model': request.form.get('motor_model',''),
-            'motor_unit': request.form.get('motor_unit',''),
-            'ratio': request.form.get('gear_ratio',''),
-            'controller': request.form.get('controller',''),
-            'other_info': request.form.get('other_info',''),
+            'job_number': generate_job_number(request.form.get('product_type'), queue_number),
+            'purpose': request.form.get('purpose', ''),
+            'motor_model': request.form.get('motor_model', ''),
+            'motor_unit': request.form.get('motor_unit', ''),
+            'ratio': request.form.get('gear_ratio', ''),
+            'controller': request.form.get('controller', ''),
+            'other_info': request.form.get('other_info', ''),
             'quotation_speed': request.form.get('quotation_speed'),
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'status': 'รอใบเสนอราคา'
